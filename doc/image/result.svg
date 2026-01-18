@@ -1,0 +1,236 @@
+<svg viewBox="0 0 800 1200" xmlns="http://www.w3.org/2000/svg">
+  <!-- 背景 -->
+  <rect width="800" height="1200" fill="#f0f4f0"/>
+  
+  <!-- ヘッダー -->
+  <rect width="800" height="80" fill="#2d5016"/>
+  <text x="400" y="50" font-size="32" font-weight="bold" fill="#fff" text-anchor="middle" font-family="sans-serif">
+    麻雀点数計算機
+  </text>
+  
+  <!-- 手牌入力エリア -->
+  <g id="input-area">
+    <rect x="20" y="100" width="760" height="220" fill="#fff" rx="8" stroke="#2d5016" stroke-width="2"/>
+    <text x="40" y="130" font-size="18" font-weight="bold" fill="#2d5016" font-family="sans-serif">
+      1. 手牌入力
+    </text>
+    
+    <!-- 手牌表示エリア -->
+    <rect x="40" y="150" width="720" height="100" fill="#1a3a0f" rx="4"/>
+    
+    <!-- サンプル手牌（萬子、筒子、索子、字牌） -->
+    <g id="tiles">
+      <!-- 1萬 -->
+      <rect x="50" y="160" width="45" height="65" fill="#fef9e7" stroke="#2d5016" stroke-width="2" rx="3"/>
+      <text x="72.5" y="200" font-size="28" fill="#c0392b" text-anchor="middle" font-family="serif">一萬</text>
+      
+      <!-- 2萬 -->
+      <rect x="100" y="160" width="45" height="65" fill="#fef9e7" stroke="#2d5016" stroke-width="2" rx="3"/>
+      <text x="122.5" y="200" font-size="28" fill="#c0392b" text-anchor="middle" font-family="serif">二萬</text>
+      
+      <!-- 3萬 -->
+      <rect x="150" y="160" width="45" height="65" fill="#fef9e7" stroke="#2d5016" stroke-width="2" rx="3"/>
+      <text x="172.5" y="200" font-size="28" fill="#c0392b" text-anchor="middle" font-family="serif">三萬</text>
+      
+      <!-- 4筒 -->
+      <rect x="200" y="160" width="45" height="65" fill="#fef9e7" stroke="#2d5016" stroke-width="2" rx="3"/>
+      <circle cx="222.5" cy="180" r="4" fill="#2471a3"/>
+      <circle cx="212.5" cy="193" r="4" fill="#2471a3"/>
+      <circle cx="232.5" cy="193" r="4" fill="#2471a3"/>
+      <circle cx="222.5" cy="206" r="4" fill="#2471a3"/>
+      
+      <!-- 5筒 -->
+      <rect x="250" y="160" width="45" height="65" fill="#fef9e7" stroke="#2d5016" stroke-width="2" rx="3"/>
+      <circle cx="262.5" cy="175" r="4" fill="#2471a3"/>
+      <circle cx="282.5" cy="175" r="4" fill="#2471a3"/>
+      <circle cx="272.5" cy="193" r="4" fill="#2471a3"/>
+      <circle cx="262.5" cy="211" r="4" fill="#2471a3"/>
+      <circle cx="282.5" cy="211" r="4" fill="#2471a3"/>
+      
+      <!-- 6筒 -->
+      <rect x="300" y="160" width="45" height="65" fill="#fef9e7" stroke="#2d5016" stroke-width="2" rx="3"/>
+      <circle cx="312.5" cy="175" r="4" fill="#2471a3"/>
+      <circle cx="332.5" cy="175" r="4" fill="#2471a3"/>
+      <circle cx="312.5" cy="193" r="4" fill="#2471a3"/>
+      <circle cx="332.5" cy="193" r="4" fill="#2471a3"/>
+      <circle cx="312.5" cy="211" r="4" fill="#2471a3"/>
+      <circle cx="332.5" cy="211" r="4" fill="#2471a3"/>
+      
+      <!-- 7索 -->
+      <rect x="350" y="160" width="45" height="65" fill="#fef9e7" stroke="#2d5016" stroke-width="2" rx="3"/>
+      <rect x="360" y="170" width="25" height="45" fill="none" stroke="#27ae60" stroke-width="2" rx="2"/>
+      <text x="372.5" y="200" font-size="20" fill="#27ae60" text-anchor="middle" font-family="serif">7</text>
+      
+      <!-- 8索 -->
+      <rect x="400" y="160" width="45" height="65" fill="#fef9e7" stroke="#2d5016" stroke-width="2" rx="3"/>
+      <rect x="410" y="170" width="25" height="45" fill="none" stroke="#27ae60" stroke-width="2" rx="2"/>
+      <text x="422.5" y="200" font-size="20" fill="#27ae60" text-anchor="middle" font-family="serif">8</text>
+      
+      <!-- 9索 -->
+      <rect x="450" y="160" width="45" height="65" fill="#fef9e7" stroke="#2d5016" stroke-width="2" rx="3"/>
+      <rect x="460" y="170" width="25" height="45" fill="none" stroke="#27ae60" stroke-width="2" rx="2"/>
+      <text x="472.5" y="200" font-size="20" fill="#27ae60" text-anchor="middle" font-family="serif">9</text>
+      
+      <!-- 東 -->
+      <rect x="500" y="160" width="45" height="65" fill="#fef9e7" stroke="#2d5016" stroke-width="2" rx="3"/>
+      <text x="522.5" y="200" font-size="28" fill="#000" text-anchor="middle" font-family="serif">東</text>
+      
+      <!-- 東 -->
+      <rect x="550" y="160" width="45" height="65" fill="#fef9e7" stroke="#2d5016" stroke-width="2" rx="3"/>
+      <text x="572.5" y="200" font-size="28" fill="#000" text-anchor="middle" font-family="serif">東</text>
+      
+      <!-- 東 -->
+      <rect x="600" y="160" width="45" height="65" fill="#fef9e7" stroke="#2d5016" stroke-width="2" rx="3"/>
+      <text x="622.5" y="200" font-size="28" fill="#000" text-anchor="middle" font-family="serif">東</text>
+      
+      <!-- 中 -->
+      <rect x="650" y="160" width="45" height="65" fill="#fef9e7" stroke="#2d5016" stroke-width="2" rx="3"/>
+      <text x="672.5" y="200" font-size="28" fill="#c0392b" text-anchor="middle" font-family="serif">中</text>
+      
+      <!-- アガリ牌（強調表示） -->
+      <rect x="710" y="155" width="45" height="70" fill="#fff9c4" stroke="#f39c12" stroke-width="3" rx="3"/>
+      <text x="732.5" y="198" font-size="28" fill="#c0392b" text-anchor="middle" font-family="serif">中</text>
+      <text x="732.5" y="245" font-size="12" fill="#f39c12" text-anchor="middle" font-family="sans-serif">ロン</text>
+    </g>
+    
+    <!-- 入力ボタン -->
+    <rect x="40" y="270" width="340" height="40" fill="#27ae60" rx="4" cursor="pointer"/>
+    <text x="210" y="295" font-size="16" fill="#fff" text-anchor="middle" font-family="sans-serif">牌を入力</text>
+    
+    <rect x="400" y="270" width="160" height="40" fill="#e67e22" rx="4" cursor="pointer"/>
+    <text x="480" y="295" font-size="16" fill="#fff" text-anchor="middle" font-family="sans-serif">クリア</text>
+    
+    <rect x="580" y="270" width="180" height="40" fill="#3498db" rx="4" cursor="pointer"/>
+    <text x="670" y="295" font-size="16" fill="#fff" text-anchor="middle" font-family="sans-serif">解析開始</text>
+  </g>
+  
+  <!-- 面子分解結果エリア -->
+  <g id="mentsu-area">
+    <rect x="20" y="340" width="760" height="180" fill="#fff" rx="8" stroke="#2d5016" stroke-width="2"/>
+    <text x="40" y="370" font-size="18" font-weight="bold" fill="#2d5016" font-family="sans-serif">
+      2. 面子分解
+    </text>
+    
+    <!-- 面子表示 -->
+    <g id="mentsu-display">
+      <!-- 順子 -->
+      <rect x="40" y="390" width="150" height="50" fill="#e8f8f5" stroke="#16a085" stroke-width="2" rx="4"/>
+      <text x="115" y="410" font-size="14" fill="#16a085" text-anchor="middle" font-family="sans-serif">順子</text>
+      <text x="115" y="430" font-size="16" fill="#2d5016" text-anchor="middle" font-family="serif">123萬</text>
+      
+      <!-- 順子 -->
+      <rect x="200" y="390" width="150" height="50" fill="#e8f8f5" stroke="#16a085" stroke-width="2" rx="4"/>
+      <text x="275" y="410" font-size="14" fill="#16a085" text-anchor="middle" font-family="sans-serif">順子</text>
+      <text x="275" y="430" font-size="16" fill="#2d5016" text-anchor="middle" font-family="serif">456筒</text>
+      
+      <!-- 順子 -->
+      <rect x="360" y="390" width="150" height="50" fill="#e8f8f5" stroke="#16a085" stroke-width="2" rx="4"/>
+      <text x="435" y="410" font-size="14" fill="#16a085" text-anchor="middle" font-family="sans-serif">順子</text>
+      <text x="435" y="430" font-size="16" fill="#2d5016" text-anchor="middle" font-family="serif">789索</text>
+      
+      <!-- 刻子 -->
+      <rect x="520" y="390" width="120" height="50" fill="#fef5e7" stroke="#d68910" stroke-width="2" rx="4"/>
+      <text x="580" y="410" font-size="14" fill="#d68910" text-anchor="middle" font-family="sans-serif">刻子</text>
+      <text x="580" y="430" font-size="16" fill="#2d5016" text-anchor="middle" font-family="serif">東東東</text>
+      
+      <!-- 雀頭 -->
+      <rect x="650" y="390" width="110" height="50" fill="#fadbd8" stroke="#c0392b" stroke-width="2" rx="4"/>
+      <text x="705" y="410" font-size="14" fill="#c0392b" text-anchor="middle" font-family="sans-serif">雀頭</text>
+      <text x="705" y="430" font-size="16" fill="#2d5016" text-anchor="middle" font-family="serif">中中</text>
+    </g>
+    
+    <!-- 状態表示 -->
+    <rect x="40" y="460" width="720" height="45" fill="#d5f4e6" rx="4"/>
+    <text x="60" y="488" font-size="14" fill="#27ae60" font-family="sans-serif">
+      ✓ 面子分解成功 - テンパイ形
+    </text>
+  </g>
+  
+  <!-- 役判定エリア -->
+  <g id="yaku-area">
+    <rect x="20" y="540" width="760" height="200" fill="#fff" rx="8" stroke="#2d5016" stroke-width="2"/>
+    <text x="40" y="570" font-size="18" font-weight="bold" fill="#2d5016" font-family="sans-serif">
+      3. 役判定
+    </text>
+    
+    <!-- 役リスト -->
+    <g id="yaku-list">
+      <!-- 役1 -->
+      <rect x="40" y="590" width="340" height="40" fill="#e8f6f3" stroke="#16a085" stroke-width="1" rx="4"/>
+      <text x="60" y="615" font-size="16" fill="#2d5016" font-family="sans-serif">三色同順</text>
+      <text x="310" y="615" font-size="16" fill="#16a085" font-weight="bold" text-anchor="end" font-family="sans-serif">2翻</text>
+      
+      <!-- 役2 -->
+      <rect x="40" y="640" width="340" height="40" fill="#e8f6f3" stroke="#16a085" stroke-width="1" rx="4"/>
+      <text x="60" y="665" font-size="16" fill="#2d5016" font-family="sans-serif">役牌：中</text>
+      <text x="310" y="665" font-size="16" fill="#16a085" font-weight="bold" text-anchor="end" font-family="sans-serif">1翻</text>
+      
+      <!-- 役3 -->
+      <rect x="40" y="690" width="340" height="40" fill="#e8f6f3" stroke="#16a085" stroke-width="1" rx="4"/>
+      <text x="60" y="715" font-size="16" fill="#2d5016" font-family="sans-serif">場風：東</text>
+      <text x="310" y="715" font-size="16" fill="#16a085" font-weight="bold" text-anchor="end" font-family="sans-serif">1翻</text>
+      
+      <!-- 合計翻数 -->
+      <rect x="420" y="590" width="340" height="140" fill="#fff3cd" stroke="#f39c12" stroke-width="2" rx="4"/>
+      <text x="440" y="620" font-size="18" fill="#2d5016" font-family="sans-serif">合計翻数</text>
+      <text x="590" y="680" font-size="48" fill="#f39c12" font-weight="bold" text-anchor="middle" font-family="sans-serif">4翻</text>
+    </g>
+  </g>
+  
+  <!-- 符計算エリア -->
+  <g id="fu-area">
+    <rect x="20" y="760" width="370" height="180" fill="#fff" rx="8" stroke="#2d5016" stroke-width="2"/>
+    <text x="40" y="790" font-size="18" font-weight="bold" fill="#2d5016" font-family="sans-serif">
+      4. 符計算
+    </text>
+    
+    <!-- 符の内訳 -->
+    <text x="60" y="820" font-size="14" fill="#5d6d7e" font-family="sans-serif">副底: 20符</text>
+    <text x="60" y="845" font-size="14" fill="#5d6d7e" font-family="sans-serif">刻子(東): 4符</text>
+    <text x="60" y="870" font-size="14" fill="#5d6d7e" font-family="sans-serif">雀頭(役牌): 2符</text>
+    <text x="60" y="895" font-size="14" fill="#5d6d7e" font-family="sans-serif">ロン: 10符</text>
+    
+    <line x1="60" y1="905" x2="350" y2="905" stroke="#5d6d7e" stroke-width="1"/>
+    
+    <rect x="60" y="910" width="290" height="20" fill="#aed6f1"/>
+    <text x="80" y="925" font-size="16" fill="#2d5016" font-weight="bold" font-family="sans-serif">合計: 40符</text>
+  </g>
+  
+  <!-- 点数計算結果エリア -->
+  <g id="score-area">
+    <rect x="410" y="760" width="370" height="180" fill="#2d5016" rx="8" stroke="#2d5016" stroke-width="2"/>
+    <text x="430" y="790" font-size="18" font-weight="bold" fill="#fff" font-family="sans-serif">
+      5. 点数計算結果
+    </text>
+    
+    <!-- 点数表示 -->
+    <rect x="430" y="810" width="330" height="120" fill="#fff" rx="4"/>
+    
+    <text x="595" y="850" font-size="16" fill="#5d6d7e" text-anchor="middle" font-family="sans-serif">満貫</text>
+    
+    <text x="595" y="900" font-size="42" fill="#c0392b" font-weight="bold" text-anchor="middle" font-family="sans-serif">8,000点</text>
+    
+    <text x="595" y="920" font-size="12" fill="#7f8c8d" text-anchor="middle" font-family="sans-serif">(親: 12,000点)</text>
+  </g>
+  
+  <!-- アクションボタン -->
+  <g id="action-buttons">
+    <rect x="20" y="960" width="240" height="50" fill="#95a5a6" rx="6" cursor="pointer"/>
+    <text x="140" y="990" font-size="18" fill="#fff" text-anchor="middle" font-family="sans-serif">もう一度</text>
+    
+    <rect x="280" y="960" width="240" height="50" fill="#3498db" rx="6" cursor="pointer"/>
+    <text x="400" y="990" font-size="18" fill="#fff" text-anchor="middle" font-family="sans-serif">結果を保存</text>
+    
+    <rect x="540" y="960" width="240" height="50" fill="#27ae60" rx="6" cursor="pointer"/>
+    <text x="660" y="990" font-size="18" fill="#fff" text-anchor="middle" font-family="sans-serif">新しい手牌</text>
+  </g>
+  
+  <!-- フッター -->
+  <rect y="1120" width="800" height="80" fill="#ecf0f1"/>
+  <text x="400" y="1150" font-size="14" fill="#7f8c8d" text-anchor="middle" font-family="sans-serif">
+    麻雀点数計算機 v1.0
+  </text>
+  <text x="400" y="1175" font-size="12" fill="#95a5a6" text-anchor="middle" font-family="sans-serif">
+    Designed by ryome
+  </text>
+</svg>
