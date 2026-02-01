@@ -46,7 +46,7 @@ export function WindSelectorCompact({
     <div className="rounded-xl bg-slate-800 p-4">
       <h3 className="mb-3 text-sm font-semibold text-slate-400">場風・自風</h3>
 
-      <div className="flex items-center gap-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
         {/* 場風 */}
         <div className="flex-1">
           <label className="mb-2 block text-[11px] text-slate-500">場風</label>

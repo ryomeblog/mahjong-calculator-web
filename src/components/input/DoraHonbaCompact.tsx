@@ -4,6 +4,7 @@
 
 // 1. React関連
 import { useCallback } from 'react'
+import { IoTrash } from 'react-icons/io5'
 
 // 2. 型定義
 import type { Tile } from '@/core/mahjong'
@@ -50,9 +51,10 @@ export function DoraHonbaCompact({
               <button
                 type="button"
                 onClick={handleClearDora}
-                className="rounded-lg bg-slate-700 px-2 py-1 text-[10px] text-slate-300 transition-colors hover:bg-slate-600"
+                className="flex items-center justify-center rounded-lg bg-slate-700 p-1.5 text-slate-300 transition-colors hover:bg-slate-600"
+                title="ドラをクリア"
               >
-                クリア
+                <IoTrash size={14} />
               </button>
             )}
           </div>

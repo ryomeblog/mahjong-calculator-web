@@ -123,13 +123,12 @@ export function SpecialYakuModal({
         {/* ヘッダー */}
         <div className="mb-6 flex items-center justify-between">
           <h2 className="text-xl font-bold text-slate-50">特殊和了を設定</h2>
-          <button
-            type="button"
+          <div
             onClick={onClose}
-            className="flex h-10 w-10 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-slate-700 hover:text-slate-200"
+            className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-slate-700 hover:text-slate-200"
           >
             <IoClose size={24} />
-          </button>
+          </div>
         </div>
 
         {/* 説明文 */}

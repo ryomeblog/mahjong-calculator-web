@@ -4,6 +4,7 @@
 
 // 1. React関連
 import { useMemo } from 'react'
+import { IoTrash } from 'react-icons/io5'
 
 // 2. 型定義
 import type { Tile as TileType, MeldGroup, Meld } from '@/core/mahjong'
@@ -193,9 +194,10 @@ export function SelectedTiles({
           <button
             type="button"
             onClick={onClearHandTiles}
-            className="rounded-lg bg-slate-700 px-3 py-1.5 text-xs text-slate-300 transition-colors hover:bg-slate-600"
+            className="flex items-center justify-center rounded-lg bg-slate-700 p-2 text-slate-300 transition-colors hover:bg-slate-600"
+            title="手牌をクリア"
           >
-            クリア
+            <IoTrash size={16} />
           </button>
         )}
       </div>
