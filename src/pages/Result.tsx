@@ -394,7 +394,7 @@ export function Result() {
         <div className="flex gap-3">
           <button
             type="button"
-            onClick={() => navigate(-1)}
+            onClick={() => navigate('/', { state })}
             className="flex-1 rounded-xl bg-slate-700 py-3.5 text-sm text-slate-300 hover:bg-slate-600"
           >
             修正する

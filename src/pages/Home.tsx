@@ -3,8 +3,8 @@
  */
 
 // 1. React関連
-import { useState, useMemo, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useMemo, useCallback, useEffect } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 
 // 2. 型定義
 import type { Tile } from '@/core/mahjong'
@@ -35,6 +35,7 @@ type ModalTarget =
 
 export function Home() {
   const navigate = useNavigate()
+  const location = useLocation()
   const [modalTarget, setModalTarget] = useState<ModalTarget>(null)
 
   const {
@@ -80,6 +81,74 @@ export function Home() {
     setDora,
     setUraDora,
   } = useTileInput()
+
+  // 結果画面から戻ってきた場合、入力内容を復元
+  useEffect(() => {
+    const restoredState = location.state as LocationState | null
+    if (restoredState && restoredState.tiles) {
+      // 手牌とスロット情報を復元
+      setHandTiles(
+        [...restoredState.tiles],
+        restoredState.handSlots || undefined
+      )
+
+      // ドラ情報を復元
+      if (restoredState.doraTiles) setDora([...restoredState.doraTiles])
+      if (restoredState.uraDoraTiles)
+        setUraDora([...restoredState.uraDoraTiles])
+
+      // 本場数を復元（複数回クリックして復元）
+      const targetHonba = restoredState.honba || 0
+      for (let i = 0; i < targetHonba; i++) {
+        incrementHonba()
+      }
+
+      // 風を復元
+      setRoundWind(restoredState.roundWind)
+      setSeatWind(restoredState.seatWind)
+
+      // 和了条件を復元
+      if (restoredState.isTsumo !== isTsumo) toggleTsumo()
+      if (restoredState.isRiichi !== isRiichi) toggleRiichi()
+      if (restoredState.isDoubleRiichi !== isDoubleRiichi) toggleDoubleRiichi()
+
+      // 特殊和了を復元
+      if (restoredState.isIppatsu && !isIppatsu) toggleIppatsu()
+      if (restoredState.isChankan && !isChankan) toggleChankan()
+      if (restoredState.isRinshan && !isRinshan) toggleRinshan()
+      if (restoredState.isHaitei && !isHaitei) toggleHaitei()
+      if (restoredState.isHoutei && !isHoutei) toggleHoutei()
+      if (restoredState.isTenhou && !isTenhou) toggleTenhou()
+      if (restoredState.isChiihou && !isChiihou) toggleChiihou()
+
+      // stateをクリアして再度実行されないようにする
+      navigate('/', { replace: true, state: null })
+    }
+  }, [location.state])
+
+  interface LocationState {
+    tiles: readonly Tile[]
+    winningTile: Tile
+    handSlots?:
+      | import('@/components/tiles/HandStructureInput').MeldSlot[]
+      | null
+    isTsumo: boolean
+    isRiichi: boolean
+    isDoubleRiichi: boolean
+    roundWind: import('@/core/mahjong').Wind
+    seatWind: import('@/core/mahjong').Wind
+    isDealer: boolean
+    doraTiles?: readonly Tile[]
+    uraDoraTiles?: readonly Tile[]
+    honba?: number
+    isIppatsu?: boolean
+    isChankan?: boolean
+    isRinshan?: boolean
+    isHaitei?: boolean
+    isHoutei?: boolean
+    isTenhou?: boolean
+    isChiihou?: boolean
+  }
 
   // モーダル設定
   const modalConfig = useMemo(() => {
