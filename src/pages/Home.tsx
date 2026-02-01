@@ -49,6 +49,7 @@ export function Home() {
     seatWind,
     removeTile,
     clearAll,
+    clearHandTiles,
     toggleTsumo,
     toggleRiichi,
     toggleDoubleRiichi,
@@ -265,6 +266,7 @@ export function Home() {
           handSlots={handSlots}
           winningTile={winningTile}
           onRemoveTile={removeTile}
+          onClearHandTiles={clearHandTiles}
           onOpenTileModal={() => setModalTarget('hand')}
         />
 

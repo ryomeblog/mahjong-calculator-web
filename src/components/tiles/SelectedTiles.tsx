@@ -20,6 +20,7 @@ interface SelectedTilesProps {
   handSlots?: MeldSlot[] | null
   winningTile: TileType | null
   onRemoveTile?: (index: number) => void
+  onClearHandTiles?: () => void
   onOpenTileModal?: () => void
 }
 
@@ -28,6 +29,7 @@ export function SelectedTiles({
   handSlots,
   winningTile,
   onRemoveTile,
+  onClearHandTiles,
   onOpenTileModal,
 }: SelectedTilesProps) {
   const tileCount = tiles.length
@@ -187,10 +189,15 @@ export function SelectedTiles({
     <div className="rounded-xl bg-slate-800 p-4">
       <div className="mb-3 flex items-center justify-between">
         <h3 className="text-sm font-semibold text-slate-400">手牌</h3>
-        <div className="flex gap-4 text-xs text-slate-500">
-          <span>{tileCount} / 14枚</span>
-          <span>鳴き: 0組</span>
-        </div>
+        {tileCount > 0 && onClearHandTiles && (
+          <button
+            type="button"
+            onClick={onClearHandTiles}
+            className="rounded-lg bg-slate-700 px-3 py-1.5 text-xs text-slate-300 transition-colors hover:bg-slate-600"
+          >
+            クリア
+          </button>
+        )}
       </div>
 
       {/* 手牌表示エリア */}

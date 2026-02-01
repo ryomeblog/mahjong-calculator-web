@@ -122,6 +122,12 @@ export function useTileInput() {
     setIsMeldMode(false)
   }
 
+  const clearHandTiles = () => {
+    setSelectedTiles([])
+    setWinningTile(null)
+    setHandSlots(null)
+  }
+
   const toggleTsumo = () => {
     setIsTsumo(!isTsumo)
   }
@@ -238,6 +244,7 @@ export function useTileInput() {
     addTile,
     removeTile,
     clearAll,
+    clearHandTiles,
     toggleTsumo,
     toggleRiichi,
     toggleDoubleRiichi,
