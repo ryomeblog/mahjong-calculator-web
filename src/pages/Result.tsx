@@ -22,6 +22,7 @@ import {
 interface LocationState {
   tiles: readonly TileType[]
   winningTile: TileType
+  handSlots?: import('@/components/tiles/HandStructureInput').MeldSlot[] | null
   isTsumo: boolean
   isRiichi: boolean
   isDoubleRiichi: boolean
@@ -56,6 +57,7 @@ export function Result() {
   const {
     tiles,
     winningTile,
+    handSlots,
     isTsumo,
     isRiichi,
     isDoubleRiichi,
@@ -362,7 +364,12 @@ export function Result() {
           <h3 className="mb-3 text-sm font-semibold text-slate-400">
             手牌の構成
           </h3>
-          <HandDisplay meldGroup={meldGroup} winningTile={winningTile} />
+          <HandDisplay
+            meldGroup={meldGroup}
+            winningTile={winningTile}
+            tiles={tiles}
+            handSlots={handSlots}
+          />
         </div>
 
         {/* 局情報 */}
@@ -447,19 +454,58 @@ function ErrorScreen({
   )
 }
 
-// 手牌表示コンポーネント（ホーム画面と完全に同じ表示）
+// 手牌表示コンポーネント（ホーム画面と同じ表示）
 function HandDisplay({
   meldGroup,
   winningTile,
+  tiles,
+  handSlots,
 }: {
   meldGroup: MeldGroup
   winningTile: TileType
+  tiles: readonly TileType[]
+  handSlots?: import('@/components/tiles/HandStructureInput').MeldSlot[] | null
 }) {
+  // handSlotsがある場合はそれを使って表示（鳴き牌情報を含む）
+  if (handSlots) {
+    return (
+      <div className="flex flex-wrap items-center gap-3">
+        {handSlots.map((slot, slotIndex) => {
+          const hasTiles = slot.tiles.some((t) => t !== null)
+          if (!hasTiles) return null
+
+          return (
+            <div key={slotIndex} className="flex items-center gap-0.5">
+              {slot.tiles.map((tile, tileIndex) => {
+                if (!tile) return null
+                const isSideways = slot.sidewaysTiles?.has(tileIndex) || false
+                const isWinningTileCheck =
+                  slotIndex === handSlots.length - 1 && tileIndex === 0
+                return (
+                  <div
+                    key={tileIndex}
+                    className={isSideways ? 'rotate-90 transform' : ''}
+                  >
+                    <Tile
+                      tile={tile}
+                      size="small"
+                      isWinning={isWinningTileCheck}
+                    />
+                  </div>
+                )
+              })}
+            </div>
+          )
+        })}
+      </div>
+    )
+  }
+
+  // handSlotsがない場合は面子分解結果を表示
   return (
     <div className="flex flex-wrap items-center gap-2">
       {/* 雀頭を最初に表示 */}
       <div className="flex items-center gap-0.5">
-        <span className="text-xs font-semibold text-slate-400">雀頭:</span>
         {meldGroup.pair.tiles.map((tile, index) => (
           <Tile key={index} tile={tile} size="small" />
         ))}
@@ -473,11 +519,6 @@ function HandDisplay({
           ))}
         </div>
       ))}
-
-      {/* 上がり牌を別に表示（間隔を開けて） */}
-      <div className="ml-2 flex items-center gap-0.5">
-        <Tile tile={winningTile} size="small" isWinning />
-      </div>
     </div>
   )
 }

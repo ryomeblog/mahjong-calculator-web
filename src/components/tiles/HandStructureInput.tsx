@@ -49,12 +49,13 @@ export function HandStructureInput({
         return (
           <div
             key={slotIndex}
+            onClick={() => !isDisabled && onSlotClick(slotIndex)}
             className={`min-w-[140px] flex-1 rounded-lg border-2 p-3 transition-all ${
               isDisabled
-                ? 'border-slate-800 bg-slate-950 opacity-50'
+                ? 'cursor-not-allowed border-slate-800 bg-slate-950 opacity-50'
                 : isSelected
-                  ? 'border-blue-500 bg-blue-900/30 shadow-md'
-                  : 'border-slate-700 bg-slate-900 hover:border-slate-600'
+                  ? 'cursor-pointer border-blue-500 bg-blue-900/30 shadow-md'
+                  : 'cursor-pointer border-slate-700 bg-slate-900 hover:border-slate-600'
             }`}
           >
             <div className="mb-2 flex items-center justify-between gap-2">
@@ -78,10 +79,7 @@ export function HandStructureInput({
                 />
               </div>
             </div>
-            <div
-              onClick={() => !isDisabled && onSlotClick(slotIndex)}
-              className={`flex gap-1 ${!isDisabled ? 'cursor-pointer' : 'cursor-not-allowed'}`}
-            >
+            <div className="flex gap-1">
               {slot.tiles.map((tile, tileIndex) => {
                 const isWinningTile =
                   winningTileSlot?.slotIndex === slotIndex &&
@@ -91,11 +89,10 @@ export function HandStructureInput({
                   <button
                     key={tileIndex}
                     type="button"
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.stopPropagation()
                       if (tile) {
                         onTileClick(slotIndex, tileIndex)
-                      } else {
-                        onSlotClick(slotIndex)
                       }
                     }}
                     className={`flex h-16 w-12 items-center justify-center rounded border-2 transition-all ${

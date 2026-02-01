@@ -137,13 +137,11 @@ export function Home() {
   // 点数計算実行（useCallbackで最適化）
   const handleCalculate = useCallback(() => {
     if (selectedTiles.length === 14 && winningTile) {
-      // 手牌13枚（上がり牌を除く）を計算
-      const handTiles = selectedTiles.slice(0, 13)
-
       navigate('/result', {
         state: {
-          tiles: handTiles,
+          tiles: selectedTiles,
           winningTile,
+          handSlots,
           isTsumo,
           isRiichi,
           isDoubleRiichi,
@@ -166,6 +164,7 @@ export function Home() {
   }, [
     selectedTiles,
     winningTile,
+    handSlots,
     isTsumo,
     isRiichi,
     isDoubleRiichi,
