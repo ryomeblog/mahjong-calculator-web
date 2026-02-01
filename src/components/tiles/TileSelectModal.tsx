@@ -49,6 +49,8 @@ export function TileSelectModal({
 }: TileSelectModalProps) {
   // 手牌選択モードかどうか
   const isHandMode = maxTiles === 14
+  // ドラ/裏ドラモード
+  const isDoraMode = maxTiles === 4 || maxTiles === 8
 
   // ドラモード用の状態
   const [stagingTiles, setStagingTiles] = useState<Tile[]>([])
@@ -104,13 +106,36 @@ export function TileSelectModal({
         }
 
         setSlots(newSlots)
+      } else if (isDoraMode) {
+        // ドラ/裏ドラモード: スロット形式
+        const slotCount = maxTiles / 4
+        const newSlots: MeldSlot[] = Array.from(
+          { length: slotCount },
+          (_, i) => ({
+            tiles: Array(4).fill(null),
+            maxTiles: 4,
+            label: i === 0 ? 'ドラ' : '裏ドラ',
+            sidewaysTiles: new Set<number>(),
+          })
+        )
+
+        // 初期牌をスロットに配置
+        let tileIdx = 0
+        for (let slotIdx = 0; slotIdx < newSlots.length; slotIdx++) {
+          for (let i = 0; i < 4 && tileIdx < initialTiles.length; i++) {
+            newSlots[slotIdx].tiles[i] = initialTiles[tileIdx++]
+          }
+        }
+
+        setSlots(newSlots)
+        setSelectedSlotIndex(0)
       } else {
-        // ドラモード: 従来通り
+        // その他: 従来通り
         setStagingTiles([...initialTiles])
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, handType])
+  }, [isOpen, handType, maxTiles])
 
   // スクロールロック
   useEffect(() => {
@@ -243,7 +268,7 @@ export function TileSelectModal({
   // 牌選択（ドラモード）
   const handleTileSelect = useCallback(
     (tile: Tile) => {
-      if (isHandMode) {
+      if (isHandMode || isDoraMode) {
         handleTileSelectForSlot(tile)
       } else {
         setStagingTiles((prev) => {
@@ -252,7 +277,7 @@ export function TileSelectModal({
         })
       }
     },
-    [isHandMode, handleTileSelectForSlot, maxTiles]
+    [isHandMode, isDoraMode, handleTileSelectForSlot, maxTiles]
   )
 
   // 牌削除（ドラモード）
@@ -268,7 +293,7 @@ export function TileSelectModal({
 
   // 決定ボタン
   const handleConfirm = () => {
-    if (isHandMode) {
+    if (isHandMode || isDoraMode) {
       // スロットから牌配列に変換
       const tiles: Tile[] = []
       for (const slot of slots) {
@@ -276,7 +301,7 @@ export function TileSelectModal({
           if (tile) tiles.push(tile)
         }
       }
-      onConfirm(tiles, slots) // スロット情報も渡す
+      onConfirm(tiles, isHandMode ? slots : undefined) // 手牌モードの場合のみスロット情報も渡す
     } else {
       onConfirm(stagingTiles)
     }
@@ -284,12 +309,13 @@ export function TileSelectModal({
   }
 
   // 現在の牌数を計算
-  const currentTileCount = isHandMode
-    ? slots.reduce(
-        (count, slot) => count + slot.tiles.filter((t) => t !== null).length,
-        0
-      )
-    : stagingTiles.length
+  const currentTileCount =
+    isHandMode || isDoraMode
+      ? slots.reduce(
+          (count, slot) => count + slot.tiles.filter((t) => t !== null).length,
+          0
+        )
+      : stagingTiles.length
 
   // initialTilesを除外したグローバル牌を計算（編集時の二重カウント防止）
   const effectiveGlobalTiles = useMemo(() => {
@@ -305,7 +331,7 @@ export function TileSelectModal({
 
   // スロットから使用中の牌を取得
   const slotsUsedTiles = useMemo(() => {
-    if (!isHandMode) return []
+    if (!isHandMode && !isDoraMode) return []
     const tiles: Tile[] = []
     for (const slot of slots) {
       for (const tile of slot.tiles) {
@@ -313,7 +339,7 @@ export function TileSelectModal({
       }
     }
     return tiles
-  }, [isHandMode, slots])
+  }, [isHandMode, isDoraMode, slots])
 
   if (!isOpen) return null
 
@@ -352,12 +378,16 @@ export function TileSelectModal({
           <div className="max-h-[200px] overflow-y-auto border-b border-slate-700 bg-slate-900 p-4">
             <div className="mb-3 flex items-center justify-between">
               <p className="text-sm font-bold text-slate-300">
-                {isHandMode ? '手牌構造' : '選択中の牌'}（{currentTileCount} /{' '}
-                {maxTiles}枚）
+                {isHandMode
+                  ? '手牌構造'
+                  : isDoraMode
+                    ? 'ドラ/裏ドラ'
+                    : '選択中の牌'}
+                （{currentTileCount} / {maxTiles}枚）
               </p>
             </div>
 
-            {isHandMode ? (
+            {isHandMode || isDoraMode ? (
               <HandStructureInput
                 onSlotClick={handleSlotClick}
                 onTileClick={handleTileClick}
@@ -413,15 +443,17 @@ export function TileSelectModal({
 
           {/* 牌グリッド */}
           <div className="flex-1 overflow-y-auto border-t border-slate-700 p-4">
-            {isHandMode && selectedSlotIndex !== null && (
+            {(isHandMode || isDoraMode) && selectedSlotIndex !== null && (
               <p className="mb-3 text-sm text-slate-400">
                 {slots[selectedSlotIndex].label}に追加する牌を選択
               </p>
             )}
-            {(!isHandMode || selectedSlotIndex !== null) && (
+            {(!(isHandMode || isDoraMode) || selectedSlotIndex !== null) && (
               <TileGrid
                 globalTiles={effectiveGlobalTiles}
-                stagingTiles={isHandMode ? slotsUsedTiles : stagingTiles}
+                stagingTiles={
+                  isHandMode || isDoraMode ? slotsUsedTiles : stagingTiles
+                }
                 onTileSelect={handleTileSelect}
                 maxTiles={maxTiles}
               />

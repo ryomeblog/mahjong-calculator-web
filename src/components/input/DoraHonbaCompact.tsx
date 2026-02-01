@@ -28,14 +28,12 @@ export function DoraHonbaCompact({
   onIncrementHonba,
   onDecrementHonba,
 }: DoraHonbaCompactProps) {
-  // ドラ牌削除ハンドラー
-  const handleRemoveDora = useCallback(
-    (index: number, e: React.MouseEvent) => {
-      e.stopPropagation()
-      onRemoveDoraTile(index)
-    },
-    [onRemoveDoraTile]
-  )
+  // ドラ牌クリアハンドラー
+  const handleClearDora = useCallback(() => {
+    for (let i = doraTiles.length - 1; i >= 0; i--) {
+      onRemoveDoraTile(i)
+    }
+  }, [doraTiles.length, onRemoveDoraTile])
 
   return (
     <div className="rounded-xl bg-slate-800 p-4">
@@ -44,11 +42,22 @@ export function DoraHonbaCompact({
       <div className="flex items-start gap-4">
         {/* ドラ表示牌 */}
         <div className="flex-1">
-          <label className="mb-2 block text-[11px] text-slate-500">
-            ドラ表示牌
-          </label>
+          <div className="mb-2 flex items-center justify-between">
+            <label className="block text-[11px] text-slate-500">
+              ドラ表示牌
+            </label>
+            {doraTiles.length > 0 && (
+              <button
+                type="button"
+                onClick={handleClearDora}
+                className="rounded-lg bg-slate-700 px-2 py-1 text-[10px] text-slate-300 transition-colors hover:bg-slate-600"
+              >
+                クリア
+              </button>
+            )}
+          </div>
           <div
-            className="flex min-h-[40px] cursor-pointer items-center gap-0.5 rounded-md border border-dashed border-slate-600 bg-slate-900 p-2 hover:border-slate-500"
+            className="flex min-h-[100px] cursor-pointer items-center gap-2 rounded-md border border-dashed border-slate-600 bg-slate-900 p-3 hover:border-slate-500"
             onClick={onOpenDoraModal}
           >
             {doraTiles.length === 0 ? (
@@ -56,16 +65,30 @@ export function DoraHonbaCompact({
                 ＋ タップして追加
               </span>
             ) : (
-              doraTiles.map((tile, index) => (
-                <button
-                  key={index}
-                  type="button"
-                  onClick={(e) => handleRemoveDora(index, e)}
-                  className="hover:opacity-60"
-                >
-                  <TileSvg tile={tile} size="small" />
-                </button>
-              ))
+              <div className="flex flex-wrap items-center gap-2">
+                {Array.from(
+                  { length: Math.ceil(doraTiles.length / 4) },
+                  (_, groupIndex) => {
+                    const start = groupIndex * 4
+                    const end = Math.min(start + 4, doraTiles.length)
+                    const groupTiles = doraTiles.slice(start, end)
+                    return (
+                      <div
+                        key={groupIndex}
+                        className="flex items-center gap-0.5"
+                      >
+                        {groupTiles.map((tile, tileIndex) => (
+                          <TileSvg
+                            key={start + tileIndex}
+                            tile={tile}
+                            size="small"
+                          />
+                        ))}
+                      </div>
+                    )
+                  }
+                )}
+              </div>
             )}
           </div>
         </div>
