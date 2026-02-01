@@ -52,9 +52,9 @@ export type TileTab = 'man' | 'pin' | 'sou' | 'honor'
  * 牌の種類ごとのラベル
  */
 export const TILE_TAB_LABELS: Record<TileTab, string> = {
-  man: '萬子（マンズ）',
-  pin: '筒子（ピンズ）',
-  sou: '索子（ソーズ）',
+  man: '萬子',
+  pin: '筒子',
+  sou: '索子',
   honor: '字牌',
 }
 

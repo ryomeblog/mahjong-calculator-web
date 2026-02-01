@@ -9,7 +9,10 @@ interface ScoreDisplayProps {
   isDealer: boolean
 }
 
-export function ScoreDisplay({ scoreCalculation, isDealer }: ScoreDisplayProps) {
+export function ScoreDisplay({
+  scoreCalculation,
+  isDealer,
+}: ScoreDisplayProps) {
   const getLimitHandName = (limitHandName: string): string => {
     const limitHandNames: Record<string, string> = {
       mangan: '満貫',
@@ -35,8 +38,12 @@ export function ScoreDisplay({ scoreCalculation, isDealer }: ScoreDisplayProps) 
       return `${payment.tsumoEach.toLocaleString()}点オール`
     }
 
-    if ('tsumoDealer' in payment && 'tsumoNonDealer' in payment &&
-        payment.tsumoDealer !== undefined && payment.tsumoNonDealer !== undefined) {
+    if (
+      'tsumoDealer' in payment &&
+      'tsumoNonDealer' in payment &&
+      payment.tsumoDealer !== undefined &&
+      payment.tsumoNonDealer !== undefined
+    ) {
       // 子のツモ
       return `${payment.tsumoDealer.toLocaleString()}点 / ${payment.tsumoNonDealer.toLocaleString()}点`
     }
@@ -63,19 +70,21 @@ export function ScoreDisplay({ scoreCalculation, isDealer }: ScoreDisplayProps) 
   }
 
   return (
-    <div className="bg-[#2d5016] rounded-lg p-5">
-      <h3 className="text-white text-lg font-bold mb-4">点数計算結果</h3>
+    <div className="rounded-lg bg-[#2d5016] p-3 sm:p-5">
+      <h3 className="mb-4 text-lg font-bold text-white">点数計算結果</h3>
 
-      <div className="bg-white rounded p-6 text-center">
+      <div className="rounded bg-white p-6 text-center">
         {scoreCalculation.isLimitHand && scoreCalculation.limitHandName && (
-          <p className="text-gray-700 text-lg mb-2">
+          <p className="mb-2 text-lg text-gray-700">
             {getLimitHandName(scoreCalculation.limitHandName)}
           </p>
         )}
 
-        <p className="text-[#c0392b] text-5xl font-bold mb-2">{getScoreText()}</p>
+        <p className="mb-2 text-3xl font-bold text-[#c0392b] sm:text-5xl">
+          {getScoreText()}
+        </p>
 
-        <p className="text-gray-500 text-sm">{getScoreDetail()}</p>
+        <p className="text-sm text-gray-500">{getScoreDetail()}</p>
       </div>
     </div>
   )

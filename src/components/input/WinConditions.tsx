@@ -20,76 +20,72 @@ export function WinConditions({
   onToggleDoubleRiichi,
 }: WinConditionsProps) {
   return (
-    <div className="bg-white rounded-lg p-5 border-2 border-[#2d5016]">
-      <h3 className="text-sm font-bold text-[#2d5016] mb-3">和了方法</h3>
+    <>
+      <h3 className="mb-4 text-base font-semibold text-gray-800">和了方法</h3>
 
-      <div className="flex flex-wrap gap-2">
-        {/* ツモ/ロンボタン */}
-        <button
-          type="button"
-          onClick={onToggleTsumo}
-          className={`
-            px-6 py-3 rounded-md text-lg font-bold
-            ${
-              isTsumo
-                ? 'bg-[#3498db] text-white border-2 border-[#2471a3]'
-                : 'bg-gray-300 text-gray-600'
-            }
-            hover:opacity-80 cursor-pointer
-          `}
-        >
-          ツモ
-        </button>
-        <button
-          type="button"
-          onClick={onToggleTsumo}
-          className={`
-            px-6 py-3 rounded-md text-lg font-bold
-            ${
-              !isTsumo
-                ? 'bg-[#3498db] text-white border-2 border-[#2471a3]'
-                : 'bg-gray-300 text-gray-600'
-            }
-            hover:opacity-80 cursor-pointer
-          `}
-        >
-          ロン
-        </button>
+      <div className="space-y-4">
+        {/* ツモ/ロン Segmented Control */}
+        <div>
+          <label className="mb-2 block text-sm font-medium text-gray-700">
+            和了の種類
+          </label>
+          <div className="inline-flex w-full gap-2">
+            <button
+              type="button"
+              onClick={() => !isTsumo && onToggleTsumo()}
+              className={`flex-1 rounded-lg border-2 py-3 text-base font-semibold transition-all ${
+                isTsumo
+                  ? 'border-gray-900 bg-white text-black shadow-md'
+                  : 'border-gray-300 bg-white text-black hover:border-gray-400'
+              }`}
+            >
+              ツモ
+            </button>
+            <button
+              type="button"
+              onClick={() => isTsumo && onToggleTsumo()}
+              className={`flex-1 rounded-lg border-2 py-3 text-base font-semibold transition-all ${
+                !isTsumo
+                  ? 'border-gray-900 bg-white text-black shadow-md'
+                  : 'border-gray-300 bg-white text-black hover:border-gray-400'
+              }`}
+            >
+              ロン
+            </button>
+          </div>
+        </div>
 
-        {/* リーチボタン */}
-        <button
-          type="button"
-          onClick={onToggleRiichi}
-          className={`
-            px-6 py-3 rounded-md text-lg
-            ${
-              isRiichi
-                ? 'bg-[#3498db] text-white border-2 border-[#2471a3]'
-                : 'bg-gray-300 text-gray-600'
-            }
-            hover:opacity-80 cursor-pointer
-          `}
-        >
-          リーチ
-        </button>
-
-        {/* ダブルリーチボタン */}
-        <button
-          type="button"
-          onClick={onToggleDoubleRiichi}
-          className={`
-            px-6 py-3 rounded-md text-lg
-            ${
-              isDoubleRiichi
-                ? 'bg-[#3498db] text-white border-2 border-[#2471a3]'
-                : 'bg-gray-300 text-gray-600'
-            }
-            hover:opacity-80 cursor-pointer
-          `}
-        >
-          ダブルリーチ
-        </button>
+        {/* リーチ・ダブルリーチ */}
+        <div>
+          <label className="mb-2 block text-sm font-medium text-gray-700">
+            リーチ
+          </label>
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={onToggleRiichi}
+              className={`flex-1 rounded-xl border-2 py-3 text-sm font-semibold transition-all ${
+                isRiichi
+                  ? 'border-gray-900 bg-white text-black shadow-md'
+                  : 'border-gray-300 bg-white text-black hover:border-gray-400'
+              }`}
+            >
+              リーチ
+            </button>
+            <button
+              type="button"
+              onClick={onToggleDoubleRiichi}
+              className={`flex-1 rounded-xl border-2 py-3 text-sm font-semibold transition-all ${
+                isDoubleRiichi
+                  ? 'border-gray-900 bg-white text-black shadow-md'
+                  : 'border-gray-300 bg-white text-black hover:border-gray-400'
+              }`}
+            >
+              ダブルリーチ
+            </button>
+          </div>
+        </div>
       </div>
-    </div>
+    </>
   )
 }

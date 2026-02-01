@@ -74,7 +74,7 @@ export function YakuList({ yakuList, totalHan }: YakuListProps) {
           ))}
         </div>
 
-        <div className="w-80 bg-[#fff3cd] border-2 border-[#f39c12] rounded p-6 flex flex-col justify-center items-center">
+        <div className="w-full bg-[#fff3cd] border-2 border-[#f39c12] rounded p-6 flex flex-col justify-center items-center sm:w-80">
           <p className="text-[#2d5016] text-lg mb-2">合計翻数</p>
           <p className="text-[#f39c12] text-5xl font-bold">{totalHan}翻</p>
         </div>

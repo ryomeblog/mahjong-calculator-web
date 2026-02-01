@@ -11,7 +11,12 @@ interface TileSvgProps {
   onClick?: () => void
 }
 
-export function TileSvg({ tile, isWinning = false, size = 'medium', onClick }: TileSvgProps) {
+export function TileSvg({
+  tile,
+  isWinning = false,
+  size = 'medium',
+  onClick,
+}: TileSvgProps) {
   const sizeMap = {
     small: { width: 40, height: 56, fontSize: 24 },
     medium: { width: 48, height: 64, fontSize: 28 },
@@ -20,15 +25,16 @@ export function TileSvg({ tile, isWinning = false, size = 'medium', onClick }: T
 
   const { width, height, fontSize } = sizeMap[size]
 
-  const renderManTile = (num: number) => {
+  const renderManTile = (num: number, isRed: boolean = false) => {
     const numbers = ['一', '二', '三', '四', '五', '六', '七', '八', '九']
+    const textColor = isRed ? '#e74c3c' : '#000'
     return (
       <>
         <text
           x={width / 2}
           y={height * 0.45}
           fontSize={fontSize}
-          fill="#c0392b"
+          fill={textColor}
           fontWeight="bold"
           textAnchor="middle"
           fontFamily="serif"
@@ -39,7 +45,7 @@ export function TileSvg({ tile, isWinning = false, size = 'medium', onClick }: T
           x={width / 2}
           y={height * 0.75}
           fontSize={fontSize * 0.7}
-          fill="#c0392b"
+          fill={textColor}
           fontWeight="bold"
           textAnchor="middle"
           fontFamily="serif"
@@ -50,7 +56,7 @@ export function TileSvg({ tile, isWinning = false, size = 'medium', onClick }: T
     )
   }
 
-  const renderPinTile = (num: number) => {
+  const renderPinTile = (num: number, isRed: boolean = false) => {
     const positions: Record<number, { x: number; y: number }[]> = {
       1: [{ x: 0.5, y: 0.5 }],
       2: [
@@ -118,6 +124,7 @@ export function TileSvg({ tile, isWinning = false, size = 'medium', onClick }: T
     const circles = positions[num] || []
     const radius = width * 0.08
 
+    const circleColor = isRed ? '#e74c3c' : '#2471a3'
     return (
       <>
         {circles.map((pos, index) => (
@@ -126,8 +133,8 @@ export function TileSvg({ tile, isWinning = false, size = 'medium', onClick }: T
             cx={pos.x * width}
             cy={pos.y * height}
             r={radius}
-            fill="#2471a3"
-            stroke="#2471a3"
+            fill={circleColor}
+            stroke={circleColor}
             strokeWidth="1"
           />
         ))}
@@ -135,8 +142,9 @@ export function TileSvg({ tile, isWinning = false, size = 'medium', onClick }: T
     )
   }
 
-  const renderSouTile = (num: number) => {
+  const renderSouTile = (num: number, isRed: boolean = false) => {
     const numbers = ['1', '2', '3', '4', '5', '6', '7', '8', '9']
+    const color = isRed ? '#e74c3c' : '#27ae60'
     return (
       <>
         <rect
@@ -145,7 +153,7 @@ export function TileSvg({ tile, isWinning = false, size = 'medium', onClick }: T
           width={width * 0.5}
           height={height * 0.5}
           fill="none"
-          stroke="#27ae60"
+          stroke={color}
           strokeWidth="2"
           rx="3"
         />
@@ -153,7 +161,7 @@ export function TileSvg({ tile, isWinning = false, size = 'medium', onClick }: T
           x={width / 2}
           y={height * 0.6}
           fontSize={fontSize * 0.8}
-          fill="#27ae60"
+          fill={color}
           fontWeight="bold"
           textAnchor="middle"
           fontFamily="serif"
@@ -214,13 +222,13 @@ export function TileSvg({ tile, isWinning = false, size = 'medium', onClick }: T
 
   const renderTileContent = () => {
     if (tile.type === 'man' && tile.number) {
-      return renderManTile(tile.number)
+      return renderManTile(tile.number, tile.isRed)
     }
     if (tile.type === 'pin' && tile.number) {
-      return renderPinTile(tile.number)
+      return renderPinTile(tile.number, tile.isRed)
     }
     if (tile.type === 'sou' && tile.number) {
-      return renderSouTile(tile.number)
+      return renderSouTile(tile.number, tile.isRed)
     }
     if (tile.type === 'wind' && tile.wind) {
       return renderWindTile(tile.wind)
@@ -254,23 +262,6 @@ export function TileSvg({ tile, isWinning = false, size = 'medium', onClick }: T
 
       {/* 牌の内容 */}
       {renderTileContent()}
-
-      {/* 赤ドラマーク */}
-      {tile.isRed && (
-        <>
-          <circle cx={width * 0.5} cy={height * 0.15} r={width * 0.1} fill="#e74c3c" />
-          <text
-            x={width / 2}
-            y={height * 0.92}
-            fontSize={fontSize * 0.3}
-            fill="#e67e22"
-            textAnchor="middle"
-            fontFamily="sans-serif"
-          >
-            赤
-          </text>
-        </>
-      )}
     </svg>
   )
 }
