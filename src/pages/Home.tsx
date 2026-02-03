@@ -9,7 +9,10 @@ import { useNavigate, useLocation } from 'react-router-dom'
 // 2. 型定義
 import type { Tile } from '@/core/mahjong'
 
-// 3. 内部コンポーネント
+// 3. ユーティリティ
+import { locationStateToSearchParams } from '@/utils/urlSerializer'
+
+// 4. 内部コンポーネント
 import { Header } from '@/components/common/Header'
 import { SelectedTiles } from '@/components/tiles/SelectedTiles'
 import { TileSelectModal } from '@/components/tiles/TileSelectModal'
@@ -207,29 +210,29 @@ export function Home() {
   // 点数計算実行（useCallbackで最適化）
   const handleCalculate = useCallback(() => {
     if (selectedTiles.length === 14 && winningTile) {
-      navigate('/result', {
-        state: {
-          tiles: selectedTiles,
-          winningTile,
-          handSlots,
-          isTsumo,
-          isRiichi,
-          isDoubleRiichi,
-          roundWind,
-          seatWind,
-          isDealer: seatWind === 'east',
-          doraTiles,
-          uraDoraTiles,
-          honba,
-          isIppatsu,
-          isChankan,
-          isRinshan,
-          isHaitei,
-          isHoutei,
-          isTenhou,
-          isChiihou,
-        },
-      })
+      const stateData = {
+        tiles: selectedTiles,
+        winningTile,
+        handSlots,
+        isTsumo,
+        isRiichi,
+        isDoubleRiichi,
+        roundWind,
+        seatWind,
+        isDealer: seatWind === 'east',
+        doraTiles,
+        uraDoraTiles,
+        honba,
+        isIppatsu,
+        isChankan,
+        isRinshan,
+        isHaitei,
+        isHoutei,
+        isTenhou,
+        isChiihou,
+      }
+      const queryString = locationStateToSearchParams(stateData).toString()
+      navigate(`/result?${queryString}`, { state: stateData })
     }
   }, [
     selectedTiles,

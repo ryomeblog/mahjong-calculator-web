@@ -2,8 +2,8 @@
  * 結果画面（SVGデザイン準拠）
  */
 
-import { useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useState, useMemo } from 'react'
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { IoArrowBack, IoChevronDown, IoChevronUp } from 'react-icons/io5'
 import { Tile } from '@/components/tiles/Tile'
 import {
@@ -19,6 +19,7 @@ import {
   type MeldGroup,
   type SpecialForm,
 } from '@/core/mahjong'
+import { searchParamsToLocationState } from '@/utils/urlSerializer'
 
 interface LocationState {
   tiles: readonly TileType[]
@@ -45,7 +46,14 @@ interface LocationState {
 export function Result() {
   const location = useLocation()
   const navigate = useNavigate()
-  const state = location.state as LocationState
+  const [searchParams] = useSearchParams()
+
+  // location.state 優先、なければクエリパラメータからデシリアライズ
+  const state = useMemo<LocationState | null>(() => {
+    const locState = location.state as LocationState | null
+    if (locState?.tiles && locState?.winningTile) return locState
+    return searchParamsToLocationState(searchParams)
+  }, [location.state, searchParams])
 
   // 役アコーディオンの状態（Hooksは早期returnの前に宣言）
   const [isYakuOpen, setIsYakuOpen] = useState(true)
