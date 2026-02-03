@@ -7,6 +7,7 @@ import type { Tile as TileType } from '@/core/mahjong'
 interface TileSvgProps {
   tile: TileType
   isWinning?: boolean
+  isDora?: boolean
   size?: 'small' | 'medium' | 'large'
   onClick?: () => void
 }
@@ -14,6 +15,7 @@ interface TileSvgProps {
 export function TileSvg({
   tile,
   isWinning = false,
+  isDora = false,
   size = 'medium',
   onClick,
 }: TileSvgProps) {
@@ -255,8 +257,8 @@ export function TileSvg({
         width={width}
         height={height}
         fill={isWinning ? '#fff9c4' : '#fef9e7'}
-        stroke={isWinning ? '#f39c12' : '#2d5016'}
-        strokeWidth={isWinning ? '3' : '2'}
+        stroke={isDora ? '#ef4444' : isWinning ? '#f39c12' : '#2d5016'}
+        strokeWidth={isDora ? '3' : isWinning ? '3' : '2'}
         rx="3"
       />
 

@@ -14,6 +14,7 @@ import type {
 import type { TileTab } from '@/types/ui'
 import { TILE_TAB_LABELS } from '@/types/ui'
 import { TileSvg } from './TileSvg'
+import { isSameTile } from '@/utils/tileUtils'
 
 interface TileGridProps {
   /** 他のエリアで既に使用中の牌（グローバルカウント用） */
@@ -25,19 +26,6 @@ interface TileGridProps {
   /** このセッションで選択可能な最大枚数 */
   readonly maxTiles: number
 }
-
-/** 赤ドラを区別する牌比較 */
-function isSameTile(a: Tile, b: Tile): boolean {
-  if (a.type !== b.type) return false
-  if (a.type === 'man' || a.type === 'pin' || a.type === 'sou') {
-    return a.number === b.number && a.isRed === b.isRed
-  }
-  if (a.type === 'wind') return a.wind === b.wind
-  if (a.type === 'dragon') return a.dragon === b.dragon
-  return false
-}
-
-export { isSameTile }
 
 export function TileGrid({
   globalTiles,

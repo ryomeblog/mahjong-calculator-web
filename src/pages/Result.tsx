@@ -379,6 +379,8 @@ export function Result() {
             winningTile={winningTile}
             tiles={tiles}
             handSlots={handSlots}
+            doraTiles={doraTiles}
+            uraDoraTiles={uraDoraTiles}
           />
         </div>
 
@@ -515,12 +517,45 @@ function convertSpecialFormToMeldGroup(specialForm: SpecialForm): MeldGroup {
 function HandDisplay({
   meldGroup,
   handSlots,
+  doraTiles,
+  uraDoraTiles,
 }: {
   meldGroup: MeldGroup
   winningTile: TileType
   tiles: readonly TileType[]
   handSlots?: import('@/components/tiles/HandStructureInput').MeldSlot[] | null
+  doraTiles?: readonly TileType[]
+  uraDoraTiles?: readonly TileType[]
 }) {
+  // ドラ牌かどうかを判定するヘルパー関数
+  const isDoraIndicator = (tile: TileType): boolean => {
+    if (!doraTiles && !uraDoraTiles) return false
+
+    const allDoraTiles = [...(doraTiles || []), ...(uraDoraTiles || [])]
+
+    return allDoraTiles.some((dora) => {
+      if (dora.type !== tile.type) return false
+      if (dora.isRed !== tile.isRed) return false
+
+      // 数牌の場合
+      if (dora.type === 'man' || dora.type === 'pin' || dora.type === 'sou') {
+        return dora.number === tile.number
+      }
+
+      // 風牌の場合
+      if (dora.type === 'wind') {
+        return dora.wind === tile.wind
+      }
+
+      // 三元牌の場合
+      if (dora.type === 'dragon') {
+        return dora.dragon === tile.dragon
+      }
+
+      return false
+    })
+  }
+
   // handSlotsがある場合はそれを使って表示（鳴き牌情報を含む）
   if (handSlots) {
     return (
@@ -536,6 +571,7 @@ function HandDisplay({
                 const isSideways = slot.sidewaysTiles?.has(tileIndex) || false
                 const isWinningTileCheck =
                   slotIndex === handSlots.length - 1 && tileIndex === 0
+                const isDora = isDoraIndicator(tile)
                 return (
                   <div
                     key={tileIndex}
@@ -545,6 +581,7 @@ function HandDisplay({
                       tile={tile}
                       size="small"
                       isWinning={isWinningTileCheck}
+                      isDora={isDora}
                     />
                   </div>
                 )
@@ -561,17 +598,21 @@ function HandDisplay({
     <div className="flex flex-wrap items-center gap-2">
       {/* 雀頭を最初に表示 */}
       <div className="flex items-center gap-0.5">
-        {meldGroup.pair.tiles.map((tile, index) => (
-          <Tile key={index} tile={tile} size="small" />
-        ))}
+        {meldGroup.pair.tiles.map((tile, index) => {
+          const isDora = isDoraIndicator(tile)
+          return <Tile key={index} tile={tile} size="small" isDora={isDora} />
+        })}
       </div>
 
       {/* 面子を表示 */}
       {meldGroup.melds.map((meld, index) => (
         <div key={index} className="flex items-center gap-0.5">
-          {meld.tiles.map((tile, tileIndex) => (
-            <Tile key={tileIndex} tile={tile} size="small" />
-          ))}
+          {meld.tiles.map((tile, tileIndex) => {
+            const isDora = isDoraIndicator(tile)
+            return (
+              <Tile key={tileIndex} tile={tile} size="small" isDora={isDora} />
+            )
+          })}
         </div>
       ))}
     </div>

@@ -334,10 +334,6 @@ export function Home() {
             {canCalculate ? '点数を計算' : '手牌を入力してください'}
           </button>
         </div>
-
-        <p className="text-center text-[11px] text-slate-600">
-          サンプル読込で操作を確認できます
-        </p>
       </div>
 
       {/* 牌選択モーダル */}

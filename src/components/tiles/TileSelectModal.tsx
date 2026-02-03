@@ -12,7 +12,7 @@ import type { Tile } from '@/core/mahjong'
 
 // 3. 内部コンポーネント
 import { TileSvg } from './TileSvg'
-import { TileGrid, isSameTile } from './TileGrid'
+import { TileGrid } from './TileGrid'
 import {
   HandStructureInput,
   type HandType,
@@ -20,6 +20,7 @@ import {
 } from './HandStructureInput'
 import { HandTypeModal, HandTypeSettingButton } from './HandTypeModal'
 import { createSlots } from '@/utils/handStructureUtils'
+import { isSameTile } from '@/utils/tileUtils'
 
 interface TileSelectModalProps {
   /** モーダル表示状態 */

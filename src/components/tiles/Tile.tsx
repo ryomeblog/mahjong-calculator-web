@@ -8,14 +8,27 @@ import { TileSvg } from './TileSvg'
 interface TileProps {
   tile: TileType
   isWinning?: boolean
+  isDora?: boolean
   size?: 'small' | 'medium' | 'large'
   onClick?: () => void
 }
 
-export function Tile({ tile, isWinning = false, size = 'medium', onClick }: TileProps) {
+export function Tile({
+  tile,
+  isWinning = false,
+  isDora = false,
+  size = 'medium',
+  onClick,
+}: TileProps) {
   return (
     <div className="inline-block">
-      <TileSvg tile={tile} isWinning={isWinning} size={size} onClick={onClick} />
+      <TileSvg
+        tile={tile}
+        isWinning={isWinning}
+        isDora={isDora}
+        size={size}
+        onClick={onClick}
+      />
     </div>
   )
 }
