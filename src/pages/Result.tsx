@@ -77,6 +77,51 @@ export function Result() {
     isChiihou = false,
   } = state
 
+  // ドラ表示牌から実際のドラ牌を特定するヘルパー関数
+  const getDoraFromIndicator = (indicator: TileType): TileType | null => {
+    if (
+      indicator.type === 'man' ||
+      indicator.type === 'pin' ||
+      indicator.type === 'sou'
+    ) {
+      const nextNumber = indicator.number === 9 ? 1 : indicator.number! + 1
+      return { type: indicator.type, number: nextNumber as TileType['number'] }
+    }
+    if (indicator.type === 'wind') {
+      const windOrder = ['east', 'south', 'west', 'north'] as const
+      const currentIndex = windOrder.indexOf(indicator.wind!)
+      const nextWind = windOrder[(currentIndex + 1) % 4]
+      return { type: 'wind', wind: nextWind }
+    }
+    if (indicator.type === 'dragon') {
+      const dragonOrder = ['white', 'green', 'red'] as const
+      const currentIndex = dragonOrder.indexOf(indicator.dragon!)
+      const nextDragon = dragonOrder[(currentIndex + 1) % 3]
+      return { type: 'dragon', dragon: nextDragon }
+    }
+    return null
+  }
+
+  // 手牌中のドラ枚数をカウント
+  const isTileMatch = (a: TileType, b: TileType): boolean => {
+    if (a.type !== b.type) return false
+    if (a.type === 'man' || a.type === 'pin' || a.type === 'sou')
+      return a.number === b.number
+    if (a.type === 'wind') return a.wind === b.wind
+    if (a.type === 'dragon') return a.dragon === b.dragon
+    return false
+  }
+
+  const countDoraInHand = (indicators: readonly TileType[]): number => {
+    let count = 0
+    for (const indicator of indicators) {
+      const doraTile = getDoraFromIndicator(indicator)
+      if (!doraTile) continue
+      count += tiles.filter((t) => isTileMatch(t, doraTile)).length
+    }
+    return count
+  }
+
   // 赤ドラカウント
   const redDoraCount = tiles.filter((t) => t.isRed).length
 
@@ -95,8 +140,8 @@ export function Result() {
     prevailingWind: roundWind,
     seatWind,
     isDealer,
-    doraCount: doraTiles.length,
-    uraDoraCount: uraDoraTiles.length,
+    doraCount: countDoraInHand(doraTiles),
+    uraDoraCount: countDoraInHand(uraDoraTiles),
     redDoraCount,
   }
 
