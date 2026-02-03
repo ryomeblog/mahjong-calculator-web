@@ -304,7 +304,7 @@ export function Result() {
           {isYakuOpen && (
             <div className="space-y-3 px-5 pt-6 pb-5">
               {sortedYakuList.map((yaku, index) => {
-                const isDora = yaku.name.includes('ドラ')
+                const isDora = yaku.displayName.includes('ドラ')
                 return (
                   <div
                     key={index}
@@ -314,7 +314,9 @@ export function Result() {
                       <div
                         className={`h-2 w-2 rounded-full ${isDora ? 'bg-red-500' : 'bg-blue-500'}`}
                       />
-                      <span className="text-sm text-slate-50">{yaku.name}</span>
+                      <span className="text-sm text-slate-50">
+                        {yaku.displayName}
+                      </span>
                     </div>
                     <span
                       className={`text-sm font-semibold ${isDora ? 'text-red-400' : 'text-blue-400'}`}
