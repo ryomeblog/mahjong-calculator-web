@@ -69,8 +69,8 @@ export function TileGrid({
         >
           <TileSvg tile={tile} size="medium" />
         </div>
-        <div className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-[#16a085] bg-[#e8f8f5]">
-          <span className="text-xs text-[#16a085]">{count}</span>
+        <div className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-teal-500 bg-teal-900/30">
+          <span className="text-xs text-teal-400">{count}</span>
         </div>
       </div>
     )
@@ -95,8 +95,8 @@ export function TileGrid({
         >
           <TileSvg tile={tile} size="medium" />
         </div>
-        <div className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-[#16a085] bg-[#e8f8f5]">
-          <span className="text-xs text-[#16a085]">{count}</span>
+        <div className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-teal-500 bg-teal-900/30">
+          <span className="text-xs text-teal-400">{count}</span>
         </div>
       </div>
     )
@@ -121,7 +121,7 @@ export function TileGrid({
           className="w-full rounded-lg border border-slate-600 bg-slate-800 px-3 py-2.5 text-sm text-slate-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
         >
           {(['man', 'pin', 'sou', 'honor'] as TileTab[]).map((tab) => (
-            <option key={tab} value={tab}>
+            <option key={tab} value={tab} className="bg-slate-800 text-slate-200">
               {TILE_TAB_LABELS[tab]}
             </option>
           ))}
@@ -155,7 +155,7 @@ export function TileGrid({
       </ul>
 
       {/* 牌パネル */}
-      <div className="rounded border border-gray-200 bg-white p-4">
+      <div className="rounded border border-slate-700 bg-slate-900 p-4">
         {activeTab === 'man' && renderNumberPanel('man')}
         {activeTab === 'pin' && renderNumberPanel('pin')}
         {activeTab === 'sou' && renderNumberPanel('sou')}
@@ -172,7 +172,7 @@ export function TileGrid({
           </div>
         )}
 
-        <div className="mt-4 text-xs text-[#95a5a6]">
+        <div className="mt-4 text-xs text-slate-500">
           <p>各牌は最大4枚まで選択できます</p>
         </div>
       </div>

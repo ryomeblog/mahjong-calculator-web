@@ -56,10 +56,10 @@ export function WindSelectorCompact({
                 key={wind}
                 type="button"
                 onClick={() => handleRoundWindClick(wind)}
-                className={`flex-1 rounded-md border-2 py-2 text-sm font-semibold transition-colors ${
+                className={`flex-1 rounded-md border py-2 text-sm transition-all ${
                   roundWind === wind
-                    ? 'border-blue-500 bg-blue-600 text-white shadow-md'
-                    : 'border-slate-600 bg-slate-700 text-slate-400 hover:border-slate-500 hover:bg-slate-600'
+                    ? 'border-blue-400 bg-blue-600 font-bold text-white ring-1 ring-blue-400'
+                    : 'border-slate-500 bg-slate-700 font-medium text-slate-400 hover:border-slate-400 hover:bg-slate-600'
                 }`}
               >
                 {WIND_LABELS[wind]}
@@ -77,10 +77,10 @@ export function WindSelectorCompact({
                 key={wind}
                 type="button"
                 onClick={() => handleSeatWindClick(wind)}
-                className={`flex-1 rounded-md border-2 py-2 text-sm font-semibold transition-colors ${
+                className={`flex-1 rounded-md border py-2 text-sm transition-all ${
                   seatWind === wind
-                    ? 'border-blue-500 bg-blue-600 text-white shadow-md'
-                    : 'border-slate-600 bg-slate-700 text-slate-400 hover:border-slate-500 hover:bg-slate-600'
+                    ? 'border-blue-400 bg-blue-600 font-bold text-white ring-1 ring-blue-400'
+                    : 'border-slate-500 bg-slate-700 font-medium text-slate-400 hover:border-slate-400 hover:bg-slate-600'
                 }`}
               >
                 {WIND_LABELS[wind]}

@@ -224,7 +224,7 @@ export function SelectedTiles({
 
       {winningTile && tileCount !== 14 && (
         <div className="mt-4">
-          <h4 className="mb-2 text-sm font-semibold text-gray-800">和了牌</h4>
+          <h4 className="mb-2 text-sm font-semibold text-slate-400">和了牌</h4>
           <Tile tile={winningTile} isWinning size="small" />
         </div>
       )}

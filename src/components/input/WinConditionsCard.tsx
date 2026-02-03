@@ -46,10 +46,10 @@ export function WinConditionsCard({
             <button
               type="button"
               onClick={handleTsumoClick}
-              className={`flex-1 rounded-md py-2.5 text-sm font-semibold transition-colors ${
+              className={`flex-1 rounded-md border py-2.5 text-sm transition-all ${
                 isTsumo
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-slate-700 text-slate-400 hover:bg-slate-600'
+                  ? 'border-blue-400 bg-blue-600 font-bold text-white ring-1 ring-blue-400'
+                  : 'border-slate-500 bg-slate-700 font-medium text-slate-400 hover:border-slate-400 hover:bg-slate-600'
               }`}
             >
               ツモ
@@ -57,10 +57,10 @@ export function WinConditionsCard({
             <button
               type="button"
               onClick={handleRonClick}
-              className={`flex-1 rounded-md py-2.5 text-sm font-semibold transition-colors ${
+              className={`flex-1 rounded-md border py-2.5 text-sm transition-all ${
                 !isTsumo
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-slate-700 text-slate-400 hover:bg-slate-600'
+                  ? 'border-blue-400 bg-blue-600 font-bold text-white ring-1 ring-blue-400'
+                  : 'border-slate-500 bg-slate-700 font-medium text-slate-400 hover:border-slate-400 hover:bg-slate-600'
               }`}
             >
               ロン
@@ -77,10 +77,10 @@ export function WinConditionsCard({
             <button
               type="button"
               onClick={onToggleRiichi}
-              className={`flex-1 rounded-md py-2.5 text-xs font-semibold transition-colors ${
+              className={`flex-1 rounded-md border py-2.5 text-xs transition-all ${
                 isRiichi
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-slate-700 text-slate-400 hover:bg-slate-600'
+                  ? 'border-blue-400 bg-blue-600 font-bold text-white ring-1 ring-blue-400'
+                  : 'border-slate-500 bg-slate-700 font-medium text-slate-400 hover:border-slate-400 hover:bg-slate-600'
               }`}
             >
               通常
@@ -88,10 +88,10 @@ export function WinConditionsCard({
             <button
               type="button"
               onClick={onToggleDoubleRiichi}
-              className={`flex-1 rounded-md py-2.5 text-xs font-semibold transition-colors ${
+              className={`flex-1 rounded-md border py-2.5 text-xs transition-all ${
                 isDoubleRiichi
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-slate-700 text-slate-400 hover:bg-slate-600'
+                  ? 'border-blue-400 bg-blue-600 font-bold text-white ring-1 ring-blue-400'
+                  : 'border-slate-500 bg-slate-700 font-medium text-slate-400 hover:border-slate-400 hover:bg-slate-600'
               }`}
             >
               W
