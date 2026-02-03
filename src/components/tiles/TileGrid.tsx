@@ -113,27 +113,8 @@ export function TileGrid({
 
   return (
     <div>
-      {/* タブ - モバイル用select */}
-      <div className="mb-4 sm:hidden">
-        <select
-          value={activeTab}
-          onChange={(e) => setActiveTab(e.target.value as TileTab)}
-          className="w-full rounded-lg border border-slate-600 bg-slate-800 px-3 py-2.5 text-sm text-slate-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
-        >
-          {(['man', 'pin', 'sou', 'honor'] as TileTab[]).map((tab) => (
-            <option
-              key={tab}
-              value={tab}
-              className="bg-slate-800 text-slate-200"
-            >
-              {TILE_TAB_LABELS[tab]}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* タブ - デスクトップ用ボタングループ */}
-      <ul className="mb-4 hidden text-center text-sm font-medium text-slate-400 sm:flex">
+      {/* タブ切り替え */}
+      <ul className="mb-4 flex text-center text-sm font-medium text-slate-400">
         {(['man', 'pin', 'sou', 'honor'] as TileTab[]).map((tab, index) => {
           const isFirst = index === 0
           const isLast = index === 3
