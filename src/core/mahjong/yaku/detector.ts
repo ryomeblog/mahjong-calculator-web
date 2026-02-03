@@ -6,11 +6,40 @@ import type { MeldGroup, WinningConditions, YakuItem } from '../types'
 import { YAKU_DEFINITIONS } from '../constants'
 
 // 実装済みの役
+// 1翻役
 import { isTanyao } from './one-han/tanyao'
 import { isPinfu } from './one-han/pinfu'
+import { isIipeikou } from './one-han/iipeikou'
+import { countYakuhaiWind, countYakuhaiDragon } from './one-han/yakuhai'
+
+// 2翻役
 import { isToitoi } from './two-han/toitoi'
+import { isChanta } from './two-han/chanta'
+import { isIkkitsuukan } from './two-han/ikkitsuukan'
+import { isSanshokuDoujun } from './two-han/sanshoku-doujun'
+import { isSanshokuDoukou } from './two-han/sanshoku-doukou'
+import { isSankantsu } from './two-han/sankantsu'
+import { isSanankou } from './two-han/sanankou'
+import { isShousangen } from './two-han/shousangen'
+import { isHonroutou } from './two-han/honroutou'
+
+// 3翻役
+import { isRyanpeikou } from './three-han/ryanpeikou'
+import { isJunchan } from './three-han/junchan'
+import { isHonitsu } from './three-han/honitsu'
+
+// 6翻役
 import { isChinitsu } from './six-han/chinitsu'
+
+// 役満
 import { isDaisangen } from './yakuman/daisangen'
+import { isSuuankou, isSuuankouTanki } from './yakuman/suuankou'
+import { isShousuushii, isDaisuushii } from './yakuman/shousuushii'
+import { isTsuuiisou } from './yakuman/tsuuiisou'
+import { isChinroutou } from './yakuman/chinroutou'
+import { isRyuuiisou } from './yakuman/ryuuiisou'
+import { isChuuren, isChuuren9 } from './yakuman/chuuren'
+import { isSuukantsu } from './yakuman/suukantsu'
 
 /**
  * 役を判定
@@ -25,13 +54,22 @@ export function detectYaku(
 ): YakuItem[] {
   const yaku: YakuItem[] = []
 
+  // 鳴いているかどうかを判定（面子に一つでも明刻・明槓があれば鳴いている）
+  const isOpen = !meldGroup.melds.every((m) => m.isConcealed)
+
   // 1. 役満を先にチェック
   const yakumanList = detectYakuman(meldGroup, conditions)
   if (yakumanList.length > 0) {
     return yakumanList // 役満があれば通常役は含めない
   }
 
-  // 2. 状況役
+  // 2. 特殊形の役
+  // 七対子
+  if (meldGroup.isSpecial && meldGroup.specialType === 'chiitoitsu') {
+    yaku.push(createYakuItem('chiitoitsu'))
+  }
+
+  // 3. 状況役
   if (conditions.isDoubleRiichi) {
     yaku.push(createYakuItem('double-riichi'))
   } else if (conditions.isRiichi) {
@@ -62,27 +100,86 @@ export function detectYaku(
     yaku.push(createYakuItem('chankan'))
   }
 
-  // 3. 手役（実装済み）
+  // 3. 手役
+  // 6翻役（優先度高）
   if (isChinitsu(meldGroup)) {
-    yaku.push(createYakuItem('chinitsu'))
+    yaku.push(createYakuItem('chinitsu', isOpen))
   }
 
-  if (isTanyao(meldGroup)) {
-    yaku.push(createYakuItem('tanyao'))
+  // 3翻役
+  if (isHonitsu(meldGroup)) {
+    yaku.push(createYakuItem('honitsu', isOpen))
   }
 
-  if (isPinfu(meldGroup, conditions)) {
-    yaku.push(createYakuItem('pinfu'))
+  if (isJunchan(meldGroup)) {
+    yaku.push(createYakuItem('junchan', isOpen))
+  }
+
+  if (isRyanpeikou(meldGroup)) {
+    yaku.push(createYakuItem('ryanpeikou', isOpen))
+  }
+
+  // 2翻役
+  if (isChanta(meldGroup)) {
+    yaku.push(createYakuItem('chanta', isOpen))
+  }
+
+  if (isIkkitsuukan(meldGroup)) {
+    yaku.push(createYakuItem('ikkitsuukan', isOpen))
+  }
+
+  if (isSanshokuDoujun(meldGroup)) {
+    yaku.push(createYakuItem('sanshoku-doujun', isOpen))
+  }
+
+  if (isSanshokuDoukou(meldGroup)) {
+    yaku.push(createYakuItem('sanshoku-doukou', isOpen))
+  }
+
+  if (isSankantsu(meldGroup)) {
+    yaku.push(createYakuItem('sankantsu', isOpen))
   }
 
   if (isToitoi(meldGroup)) {
-    yaku.push(createYakuItem('toitoi'))
+    yaku.push(createYakuItem('toitoi', isOpen))
   }
 
-  // TODO: 他の役の実装
-  // - 一盃口、役牌、混全帯么九、一気通貫、三色同順、三色同刻、三槓子、三暗刻、小三元、混老頭
-  // - 二盃口、純全帯么九、混一色
-  // これらは同様のパターンで実装可能
+  if (isSanankou(meldGroup)) {
+    yaku.push(createYakuItem('sanankou', isOpen))
+  }
+
+  if (isShousangen(meldGroup)) {
+    yaku.push(createYakuItem('shousangen', isOpen))
+  }
+
+  if (isHonroutou(meldGroup)) {
+    yaku.push(createYakuItem('honroutou', isOpen))
+  }
+
+  // 1翻役
+  if (isTanyao(meldGroup)) {
+    yaku.push(createYakuItem('tanyao', isOpen))
+  }
+
+  if (isPinfu(meldGroup, conditions)) {
+    yaku.push(createYakuItem('pinfu', isOpen))
+  }
+
+  if (isIipeikou(meldGroup)) {
+    yaku.push(createYakuItem('iipeikou', isOpen))
+  }
+
+  // 役牌（風牌）
+  const yakuhaiWindCount = countYakuhaiWind(meldGroup, conditions)
+  for (let i = 0; i < yakuhaiWindCount; i++) {
+    yaku.push(createYakuItem('yakuhai-wind', isOpen))
+  }
+
+  // 役牌（三元牌）
+  const yakuhaiDragonCount = countYakuhaiDragon(meldGroup)
+  for (let i = 0; i < yakuhaiDragonCount; i++) {
+    yaku.push(createYakuItem('yakuhai-dragon', isOpen))
+  }
 
   // 役がない場合はエラー
   if (yaku.length === 0) {
@@ -118,14 +215,54 @@ function detectYakuman(
     return yakuman
   }
 
-  // 大三元
+  // ダブル役満チェック（優先度高）
+  if (isChuuren9(meldGroup)) {
+    yakuman.push(createYakuItem('chuuren-9'))
+    return yakuman
+  }
+
+  if (isSuuankouTanki(meldGroup)) {
+    yakuman.push(createYakuItem('suuankou-tanki'))
+    return yakuman
+  }
+
+  if (isDaisuushii(meldGroup)) {
+    yakuman.push(createYakuItem('daisuushii'))
+    return yakuman
+  }
+
+  // 通常役満
+  if (isChuuren(meldGroup)) {
+    yakuman.push(createYakuItem('chuuren'))
+  }
+
+  if (isSuuankou(meldGroup)) {
+    yakuman.push(createYakuItem('suuankou'))
+  }
+
   if (isDaisangen(meldGroup)) {
     yakuman.push(createYakuItem('daisangen'))
   }
 
-  // TODO: 他の役満の実装
-  // - 四暗刻、小四喜、大四喜、字一色、清老頭、緑一色、九蓮宝燈、四槓子
-  // これらも同様のパターンで実装可能
+  if (isShousuushii(meldGroup)) {
+    yakuman.push(createYakuItem('shousuushii'))
+  }
+
+  if (isTsuuiisou(meldGroup)) {
+    yakuman.push(createYakuItem('tsuuiisou'))
+  }
+
+  if (isChinroutou(meldGroup)) {
+    yakuman.push(createYakuItem('chinroutou'))
+  }
+
+  if (isRyuuiisou(meldGroup)) {
+    yakuman.push(createYakuItem('ryuuiisou'))
+  }
+
+  if (isSuukantsu(meldGroup)) {
+    yakuman.push(createYakuItem('suukantsu'))
+  }
 
   return yakuman
 }
@@ -133,11 +270,21 @@ function detectYakuman(
 /**
  * YakuItemを作成
  */
-function createYakuItem(name: keyof typeof YAKU_DEFINITIONS): YakuItem {
+function createYakuItem(
+  name: keyof typeof YAKU_DEFINITIONS,
+  isOpen: boolean = false
+): YakuItem {
   const def = YAKU_DEFINITIONS[name]
+
+  // 鳴いている場合で、openHanが定義されている場合は、openHanを使用
+  const han =
+    isOpen && def.openHan !== null && def.openHan !== undefined
+      ? def.openHan
+      : def.han
+
   return {
     name: def.name,
-    han: def.han,
+    han,
     displayName: def.displayName,
     isYakuman: def.isYakuman,
     openHan: def.openHan ?? undefined,
@@ -160,9 +307,7 @@ export function calculateHan(
 
   // ドラの翻数
   const doraHan =
-    conditions.doraCount +
-    conditions.uraDoraCount +
-    conditions.redDoraCount
+    conditions.doraCount + conditions.uraDoraCount + conditions.redDoraCount
 
   return yakuHan + doraHan
 }

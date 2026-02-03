@@ -528,28 +528,42 @@ function HandDisplay({
   uraDoraTiles?: readonly TileType[]
 }) {
   // ドラ牌かどうかを判定するヘルパー関数
+  // ドラ表示牌の次の牌がドラ
   const isDoraIndicator = (tile: TileType): boolean => {
     if (!doraTiles && !uraDoraTiles) return false
 
-    const allDoraTiles = [...(doraTiles || []), ...(uraDoraTiles || [])]
+    const allDoraIndicators = [...(doraTiles || []), ...(uraDoraTiles || [])]
 
-    return allDoraTiles.some((dora) => {
-      if (dora.type !== tile.type) return false
-      if (dora.isRed !== tile.isRed) return false
+    return allDoraIndicators.some((indicator) => {
+      if (indicator.type !== tile.type) return false
 
-      // 数牌の場合
-      if (dora.type === 'man' || dora.type === 'pin' || dora.type === 'sou') {
-        return dora.number === tile.number
+      // 数牌の場合: 1→2, 2→3, ..., 9→1
+      if (
+        indicator.type === 'man' ||
+        indicator.type === 'pin' ||
+        indicator.type === 'sou'
+      ) {
+        if (tile.type !== indicator.type) return false
+        const nextNumber = indicator.number === 9 ? 1 : indicator.number! + 1
+        return tile.number === nextNumber
       }
 
-      // 風牌の場合
-      if (dora.type === 'wind') {
-        return dora.wind === tile.wind
+      // 風牌の場合: 東→南→西→北→東
+      if (indicator.type === 'wind') {
+        if (tile.type !== 'wind') return false
+        const windOrder = ['east', 'south', 'west', 'north'] as const
+        const currentIndex = windOrder.indexOf(indicator.wind!)
+        const nextWind = windOrder[(currentIndex + 1) % 4]
+        return tile.wind === nextWind
       }
 
-      // 三元牌の場合
-      if (dora.type === 'dragon') {
-        return dora.dragon === tile.dragon
+      // 三元牌の場合: 白→發→中→白
+      if (indicator.type === 'dragon') {
+        if (tile.type !== 'dragon') return false
+        const dragonOrder = ['white', 'green', 'red'] as const
+        const currentIndex = dragonOrder.indexOf(indicator.dragon!)
+        const nextDragon = dragonOrder[(currentIndex + 1) % 3]
+        return tile.dragon === nextDragon
       }
 
       return false

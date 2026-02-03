@@ -56,11 +56,9 @@ export function calculateFu(
   const pairFu = calculatePairFu(meldGroup.pair, conditions)
   const waitFu = calculateWaitFu(meldGroup.wait)
   const tsumoFu = conditions.isTsumo ? 2 : 0
-  const concealedFu =
-    !conditions.isTsumo && isAllConcealed(meldGroup) ? 10 : 0
+  const concealedFu = !conditions.isTsumo && isAllConcealed(meldGroup) ? 10 : 0
 
-  let totalFu =
-    baseFu + meldsFu + pairFu + waitFu + tsumoFu + concealedFu
+  let totalFu = baseFu + meldsFu + pairFu + waitFu + tsumoFu + concealedFu
 
   // 切り上げ（10の位）
   totalFu = Math.ceil(totalFu / 10) * 10
