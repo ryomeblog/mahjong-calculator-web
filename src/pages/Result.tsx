@@ -225,15 +225,15 @@ export function Result() {
     <div className="min-h-screen bg-slate-950">
       {/* ヘッダー */}
       <header className="relative flex h-16 items-center bg-slate-800 px-5">
-        <h1 className="flex-1 text-center text-xl font-bold text-slate-50">
-          計算結果
-        </h1>
         <div
-          onClick={() => navigate('/')}
-          className="absolute top-4 right-5 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-slate-700 text-slate-300 hover:bg-slate-600"
+          onClick={() => navigate('/', { state })}
+          className="absolute top-4 left-5 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-slate-700 text-slate-300 hover:bg-slate-600"
         >
           <IoArrowBack size={18} />
         </div>
+        <h1 className="flex-1 text-center text-xl font-bold text-slate-50">
+          計算結果
+        </h1>
       </header>
 
       <div className="container-responsive space-y-5 px-5 py-5">
