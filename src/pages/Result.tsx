@@ -19,7 +19,7 @@ import {
   type MeldGroup,
   type SpecialForm,
 } from '@/core/mahjong'
-import { searchParamsToLocationState } from '@/utils/urlSerializer'
+import { searchParamsToLocationState, type ParseResult } from '@/utils/urlSerializer'
 
 interface LocationState {
   tiles: readonly TileType[]
@@ -49,14 +49,33 @@ export function Result() {
   const [searchParams] = useSearchParams()
 
   // location.state 優先、なければクエリパラメータからデシリアライズ
-  const state = useMemo<LocationState | null>(() => {
+  const hasQueryParams = searchParams.has('h')
+  const resolved = useMemo<{
+    state: LocationState | null
+    error: string | null
+  }>(() => {
     const locState = location.state as LocationState | null
-    if (locState?.tiles && locState?.winningTile) return locState
-    return searchParamsToLocationState(searchParams)
-  }, [location.state, searchParams])
+    if (locState?.tiles && locState?.winningTile) {
+      return { state: locState, error: null }
+    }
+    if (!hasQueryParams) {
+      return { state: null, error: null }
+    }
+    const result: ParseResult = searchParamsToLocationState(searchParams)
+    if (result.ok) {
+      return { state: result.state, error: null }
+    }
+    return { state: null, error: result.error }
+  }, [location.state, searchParams, hasQueryParams])
+
+  const state = resolved.state
 
   // 役アコーディオンの状態（Hooksは早期returnの前に宣言）
   const [isYakuOpen, setIsYakuOpen] = useState(true)
+
+  if (resolved.error) {
+    return <ErrorScreen message={resolved.error} navigate={navigate} />
+  }
 
   if (!state || !state.tiles || !state.winningTile) {
     navigate('/')

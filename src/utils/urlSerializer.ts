@@ -193,27 +193,48 @@ export function locationStateToSearchParams(
   return params
 }
 
+export type ParseResult =
+  | { ok: true; state: LocationState }
+  | { ok: false; error: string }
+
 /**
- * URLSearchParams → LocationState (失敗時は null)
+ * URLSearchParams → LocationState
+ * 失敗時はエラー理由を返す
  */
 export function searchParamsToLocationState(
   params: URLSearchParams
-): LocationState | null {
+): ParseResult {
   const h = params.get('h')
   const w = params.get('w')
   const rw = params.get('rw')
   const sw = params.get('sw')
 
   // 必須パラメータのバリデーション
-  if (!h || !w || !rw || !sw) return null
+  if (!h || !w || !rw || !sw) {
+    const missing = [
+      !h && 'h(手牌)',
+      !w && 'w(和了牌)',
+      !rw && 'rw(場風)',
+      !sw && 'sw(自風)',
+    ].filter(Boolean)
+    return { ok: false, error: `必須パラメータが不足: ${missing.join(', ')}` }
+  }
 
   const roundWind = codeToWind(rw)
   const seatWind = codeToWind(sw)
-  if (!roundWind || !seatWind) return null
+  if (!roundWind || !seatWind) {
+    return { ok: false, error: `風の値が不正です（rw=${rw}, sw=${sw}）。E/S/W/N のいずれかを指定してください` }
+  }
 
   const tiles = compactStringToTiles(h)
   const winningTiles = compactStringToTiles(w)
-  if (tiles.length !== 14 || winningTiles.length !== 1) return null
+
+  if (tiles.length !== 14) {
+    return { ok: false, error: `手牌(h)は14枚必要です（現在${tiles.length}枚）` }
+  }
+  if (winningTiles.length !== 1) {
+    return { ok: false, error: `和了牌(w)は1枚で指定してください（現在${winningTiles.length}枚）` }
+  }
 
   const winningTile = winningTiles[0]
 
@@ -221,23 +242,26 @@ export function searchParamsToLocationState(
   const uraDoraTilesStr = params.get('ura')
 
   return {
-    tiles,
-    winningTile,
-    isTsumo: params.get('t') === '1',
-    isRiichi: params.get('r') === '1',
-    isDoubleRiichi: params.get('dr') === '1',
-    roundWind,
-    seatWind,
-    isDealer: seatWind === 'east',
-    doraTiles: doraTilesStr ? compactStringToTiles(doraTilesStr) : [],
-    uraDoraTiles: uraDoraTilesStr ? compactStringToTiles(uraDoraTilesStr) : [],
-    honba: parseInt(params.get('hb') || '0', 10),
-    isIppatsu: params.get('ip') === '1',
-    isChankan: params.get('ck') === '1',
-    isRinshan: params.get('rs') === '1',
-    isHaitei: params.get('ht') === '1',
-    isHoutei: params.get('ho') === '1',
-    isTenhou: params.get('th') === '1',
-    isChiihou: params.get('ch') === '1',
+    ok: true,
+    state: {
+      tiles,
+      winningTile,
+      isTsumo: params.get('t') === '1',
+      isRiichi: params.get('r') === '1',
+      isDoubleRiichi: params.get('dr') === '1',
+      roundWind,
+      seatWind,
+      isDealer: seatWind === 'east',
+      doraTiles: doraTilesStr ? compactStringToTiles(doraTilesStr) : [],
+      uraDoraTiles: uraDoraTilesStr ? compactStringToTiles(uraDoraTilesStr) : [],
+      honba: parseInt(params.get('hb') || '0', 10),
+      isIppatsu: params.get('ip') === '1',
+      isChankan: params.get('ck') === '1',
+      isRinshan: params.get('rs') === '1',
+      isHaitei: params.get('ht') === '1',
+      isHoutei: params.get('ho') === '1',
+      isTenhou: params.get('th') === '1',
+      isChiihou: params.get('ch') === '1',
+    },
   }
 }
