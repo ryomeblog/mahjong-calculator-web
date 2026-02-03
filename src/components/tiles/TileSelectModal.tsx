@@ -376,7 +376,7 @@ export function TileSelectModal({
           </div>
 
           {/* 選択中の牌 / 手牌構造 */}
-          <div className="h-[400px] min-h-[400px] overflow-y-auto border-b border-slate-700 bg-slate-900 p-4">
+          <div className="overflow-y-auto border-b border-slate-700 bg-slate-900 p-4">
             <div className="mb-3 flex items-center justify-between">
               <p className="text-sm font-bold text-slate-300">
                 {isHandMode
@@ -443,7 +443,7 @@ export function TileSelectModal({
           </div>
 
           {/* 牌グリッド */}
-          <div className="flex-1 overflow-y-auto border-t border-slate-700 p-4">
+          <div className="h-[385px] min-h-[385px] overflow-y-auto border-t border-slate-700 p-4">
             {(isHandMode || isDoraMode) && selectedSlotIndex !== null && (
               <p className="mb-3 text-sm text-slate-400">
                 {slots[selectedSlotIndex].label}に追加する牌を選択
