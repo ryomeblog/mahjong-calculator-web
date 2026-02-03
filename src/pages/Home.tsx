@@ -11,6 +11,7 @@ import type { Tile } from '@/core/mahjong'
 
 // 3. ユーティリティ
 import { locationStateToSearchParams } from '@/utils/urlSerializer'
+import { createSlots } from '@/utils/handStructureUtils'
 
 // 4. 内部コンポーネント
 import { Header } from '@/components/common/Header'
@@ -90,11 +91,31 @@ export function Home() {
   useEffect(() => {
     const restoredState = location.state as LocationState | null
     if (restoredState && restoredState.tiles) {
-      // 手牌とスロット情報を復元
-      setHandTiles(
-        [...restoredState.tiles],
-        restoredState.handSlots || undefined
-      )
+      // 手牌とスロット情報を復元（handSlotsがない場合はhandGroupsから生成）
+      let restoredSlots = restoredState.handSlots || undefined
+      if (
+        !restoredSlots &&
+        restoredState.handGroups &&
+        restoredState.winningTile &&
+        restoredState.tiles.length === 14
+      ) {
+        const groups = restoredState.handGroups
+        const handType =
+          groups.length === 7
+            ? 'chiitoitsu'
+            : groups.length === 1 && groups[0].length === 13
+              ? 'kokushi'
+              : 'standard'
+        const slots = createSlots(handType)
+        for (let i = 0; i < Math.min(groups.length, slots.length - 1); i++) {
+          for (let j = 0; j < groups[i].length && j < slots[i].maxTiles; j++) {
+            slots[i].tiles[j] = groups[i][j]
+          }
+        }
+        slots[slots.length - 1].tiles[0] = restoredState.winningTile
+        restoredSlots = slots
+      }
+      setHandTiles([...restoredState.tiles], restoredSlots)
 
       // ドラ情報を復元
       if (restoredState.doraTiles) setDora([...restoredState.doraTiles])
@@ -136,6 +157,7 @@ export function Home() {
     handSlots?:
       | import('@/components/tiles/HandStructureInput').MeldSlot[]
       | null
+    handGroups?: readonly (readonly Tile[])[]
     isTsumo: boolean
     isRiichi: boolean
     isDoubleRiichi: boolean
@@ -210,10 +232,20 @@ export function Home() {
   // 点数計算実行（useCallbackで最適化）
   const handleCalculate = useCallback(() => {
     if (selectedTiles.length === 14 && winningTile) {
+      // handSlotsからグループ構造を取得（和了牌スロットを除いた13枚）
+      let handGroups: Tile[][] | undefined
+      if (handSlots && handSlots.length > 1) {
+        handGroups = handSlots
+          .slice(0, -1)
+          .map((slot) => slot.tiles.filter((t): t is Tile => t !== null))
+          .filter((group) => group.length > 0)
+      }
+
       const stateData = {
         tiles: selectedTiles,
         winningTile,
         handSlots,
+        handGroups,
         isTsumo,
         isRiichi,
         isDoubleRiichi,
@@ -345,6 +377,7 @@ export function Home() {
         title={modalConfig.title}
         maxTiles={modalConfig.maxTiles}
         initialTiles={modalConfig.initialTiles}
+        initialSlots={modalTarget === 'hand' ? handSlots : undefined}
         globalTiles={allGlobalTiles}
         onConfirm={handleModalConfirm}
         onClose={() => setModalTarget(null)}

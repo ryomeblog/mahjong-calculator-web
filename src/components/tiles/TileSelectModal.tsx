@@ -31,6 +31,8 @@ interface TileSelectModalProps {
   readonly maxTiles: number
   /** モーダルを開いた時点で既に選択済みの牌 */
   readonly initialTiles: readonly Tile[]
+  /** 既存のスロット情報（手牌モードで復元用） */
+  readonly initialSlots?: MeldSlot[] | null
   /** 全エリアで使用中の牌（グローバル4枚制限用） */
   readonly globalTiles: readonly Tile[]
   /** 決定時のコールバック */
@@ -44,6 +46,7 @@ export function TileSelectModal({
   title,
   maxTiles,
   initialTiles,
+  initialSlots,
   globalTiles,
   onConfirm,
   onClose,
@@ -72,41 +75,58 @@ export function TileSelectModal({
   useEffect(() => {
     if (isOpen) {
       if (isHandMode) {
-        // 手牌モード: スロットに変換
-        const newSlots = createSlots(handType)
-
-        // 14枚の場合、最後の1枚は上がり牌スロットに
-        if (initialTiles.length === 14) {
-          let tileIdx = 0
-          // 最後のスロット以外に牌を配置
-          for (let slotIdx = 0; slotIdx < newSlots.length - 1; slotIdx++) {
-            for (
-              let i = 0;
-              i < newSlots[slotIdx].maxTiles && tileIdx < 13;
-              i++
-            ) {
-              newSlots[slotIdx].tiles[i] = initialTiles[tileIdx++]
-            }
-          }
-          // 最後の1枚を上がり牌スロットに
-          newSlots[newSlots.length - 1].tiles[0] = initialTiles[13]
-          setSelectedSlotIndex(newSlots.length - 1) // 上がり牌スロットを選択
+        // 既存スロットが現在の手牌形式と一致する場合はそのまま使う
+        const expectedLength =
+          handType === 'standard' ? 6 : handType === 'chiitoitsu' ? 8 : 2
+        if (
+          initialSlots &&
+          initialSlots.length === expectedLength &&
+          initialTiles.length === 14
+        ) {
+          const clonedSlots = initialSlots.map((slot) => ({
+            ...slot,
+            tiles: [...slot.tiles],
+            sidewaysTiles: new Set(slot.sidewaysTiles || []),
+          }))
+          setSlots(clonedSlots)
+          setSelectedSlotIndex(clonedSlots.length - 1)
         } else {
-          // 14枚未満の場合は従来通り
-          let tileIdx = 0
-          for (let slotIdx = 0; slotIdx < newSlots.length; slotIdx++) {
-            for (
-              let i = 0;
-              i < newSlots[slotIdx].maxTiles && tileIdx < initialTiles.length;
-              i++
-            ) {
-              newSlots[slotIdx].tiles[i] = initialTiles[tileIdx++]
-            }
-          }
-          setSelectedSlotIndex(0) // 最初のスロットを選択
-        }
+          // 手牌モード: スロットに変換
+          const newSlots = createSlots(handType)
 
-        setSlots(newSlots)
+          // 14枚の場合、最後の1枚は上がり牌スロットに
+          if (initialTiles.length === 14) {
+            let tileIdx = 0
+            // 最後のスロット以外に牌を配置
+            for (let slotIdx = 0; slotIdx < newSlots.length - 1; slotIdx++) {
+              for (
+                let i = 0;
+                i < newSlots[slotIdx].maxTiles && tileIdx < 13;
+                i++
+              ) {
+                newSlots[slotIdx].tiles[i] = initialTiles[tileIdx++]
+              }
+            }
+            // 最後の1枚を上がり牌スロットに
+            newSlots[newSlots.length - 1].tiles[0] = initialTiles[13]
+            setSelectedSlotIndex(newSlots.length - 1) // 上がり牌スロットを選択
+          } else {
+            // 14枚未満の場合は従来通り
+            let tileIdx = 0
+            for (let slotIdx = 0; slotIdx < newSlots.length; slotIdx++) {
+              for (
+                let i = 0;
+                i < newSlots[slotIdx].maxTiles && tileIdx < initialTiles.length;
+                i++
+              ) {
+                newSlots[slotIdx].tiles[i] = initialTiles[tileIdx++]
+              }
+            }
+            setSelectedSlotIndex(0) // 最初のスロットを選択
+          }
+
+          setSlots(newSlots)
+        }
       } else if (isDoraMode) {
         // ドラ/裏ドラモード: スロット形式
         const slotCount = maxTiles / 4

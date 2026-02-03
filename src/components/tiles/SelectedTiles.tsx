@@ -137,7 +137,6 @@ export function SelectedTiles({
       <div className="flex flex-wrap items-center gap-2">
         {/* 雀頭を最初に表示 */}
         <div className="flex items-center gap-0.5">
-          <span className="text-xs font-semibold text-slate-400">雀頭:</span>
           {meldGroup.pair.tiles.map((t, i) => (
             <Tile key={i} tile={t} size="small" />
           ))}

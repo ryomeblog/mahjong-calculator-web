@@ -19,12 +19,16 @@ import {
   type MeldGroup,
   type SpecialForm,
 } from '@/core/mahjong'
-import { searchParamsToLocationState, type ParseResult } from '@/utils/urlSerializer'
+import {
+  searchParamsToLocationState,
+  type ParseResult,
+} from '@/utils/urlSerializer'
 
 interface LocationState {
   tiles: readonly TileType[]
   winningTile: TileType
   handSlots?: import('@/components/tiles/HandStructureInput').MeldSlot[] | null
+  handGroups?: readonly (readonly TileType[])[]
   isTsumo: boolean
   isRiichi: boolean
   isDoubleRiichi: boolean
@@ -463,6 +467,7 @@ export function Result() {
             winningTile={winningTile}
             tiles={tiles}
             handSlots={handSlots}
+            handGroups={state.handGroups}
             doraTiles={doraTiles}
             uraDoraTiles={uraDoraTiles}
           />
@@ -597,10 +602,11 @@ function convertSpecialFormToMeldGroup(specialForm: SpecialForm): MeldGroup {
   }
 }
 
-// 手牌表示コンポーネント（ホーム画面と同じ表示）
+// 手牌表示コンポーネント
 function HandDisplay({
-  meldGroup,
+  winningTile,
   handSlots,
+  handGroups,
   doraTiles,
   uraDoraTiles,
 }: {
@@ -608,6 +614,7 @@ function HandDisplay({
   winningTile: TileType
   tiles: readonly TileType[]
   handSlots?: import('@/components/tiles/HandStructureInput').MeldSlot[] | null
+  handGroups?: readonly (readonly TileType[])[]
   doraTiles?: readonly TileType[]
   uraDoraTiles?: readonly TileType[]
 }) {
@@ -621,7 +628,6 @@ function HandDisplay({
     return allDoraIndicators.some((indicator) => {
       if (indicator.type !== tile.type) return false
 
-      // 数牌の場合: 1→2, 2→3, ..., 9→1
       if (
         indicator.type === 'man' ||
         indicator.type === 'pin' ||
@@ -632,7 +638,6 @@ function HandDisplay({
         return tile.number === nextNumber
       }
 
-      // 風牌の場合: 東→南→西→北→東
       if (indicator.type === 'wind') {
         if (tile.type !== 'wind') return false
         const windOrder = ['east', 'south', 'west', 'north'] as const
@@ -641,7 +646,6 @@ function HandDisplay({
         return tile.wind === nextWind
       }
 
-      // 三元牌の場合: 白→發→中→白
       if (indicator.type === 'dragon') {
         if (tile.type !== 'dragon') return false
         const dragonOrder = ['white', 'green', 'red'] as const
@@ -691,28 +695,35 @@ function HandDisplay({
     )
   }
 
-  // handSlotsがない場合は面子分解結果を表示
-  return (
-    <div className="flex flex-wrap items-center gap-2">
-      {/* 雀頭を最初に表示 */}
-      <div className="flex items-center gap-0.5">
-        {meldGroup.pair.tiles.map((tile, index) => {
-          const isDora = isDoraIndicator(tile)
-          return <Tile key={index} tile={tile} size="small" isDora={isDora} />
-        })}
-      </div>
+  // handGroups または手牌13枚 + 和了牌を右端に表示
+  // handGroupsがない場合は全13枚を1グループとして表示
+  const groups: readonly (readonly TileType[])[] = handGroups ?? []
 
-      {/* 面子を表示 */}
-      {meldGroup.melds.map((meld, index) => (
-        <div key={index} className="flex items-center gap-0.5">
-          {meld.tiles.map((tile, tileIndex) => {
-            const isDora = isDoraIndicator(tile)
-            return (
-              <Tile key={tileIndex} tile={tile} size="small" isDora={isDora} />
-            )
-          })}
+  return (
+    <div className="flex flex-wrap items-center gap-3">
+      {/* 手牌グループ（13枚） */}
+      {groups.map((group, groupIndex) => (
+        <div key={groupIndex} className="flex items-center gap-0.5">
+          {group.map((tile, tileIndex) => (
+            <Tile
+              key={tileIndex}
+              tile={tile}
+              size="small"
+              isDora={isDoraIndicator(tile)}
+            />
+          ))}
         </div>
       ))}
+
+      {/* 和了牌（右端） */}
+      <div className="flex items-center gap-0.5">
+        <Tile
+          tile={winningTile}
+          size="small"
+          isWinning
+          isDora={isDoraIndicator(winningTile)}
+        />
+      </div>
     </div>
   )
 }

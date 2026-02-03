@@ -137,6 +137,7 @@ export function codeToWind(code: string): Wind | null {
 interface LocationState {
   tiles: readonly Tile[]
   winningTile: Tile
+  handGroups?: readonly (readonly Tile[])[]
   isTsumo: boolean
   isRiichi: boolean
   isDoubleRiichi: boolean
@@ -157,19 +158,30 @@ interface LocationState {
 
 /**
  * LocationState → URLSearchParams
+ * h = 13枚（グループを`-`区切り）, w = 和了牌1枚
  */
 export function locationStateToSearchParams(
   state: LocationState
 ): URLSearchParams {
   const params = new URLSearchParams()
 
-  // 必須パラメータ
-  params.set('h', tilesToCompactString(state.tiles))
+  // h = 13枚（和了牌を除いた手牌、グループ区切り）
+  if (state.handGroups && state.handGroups.length > 0) {
+    params.set(
+      'h',
+      state.handGroups.map((g) => tilesToCompactString(g)).join('-')
+    )
+  } else {
+    // handGroupsがない場合: 先頭13枚を使用
+    params.set('h', tilesToCompactString(state.tiles.slice(0, 13)))
+  }
+
+  // w = 和了牌（1枚）
   params.set('w', tilesToCompactString([state.winningTile]))
   params.set('rw', windToCode(state.roundWind))
   params.set('sw', windToCode(state.seatWind))
 
-  // オプショナルパラメータ（デフォルトと異なる場合のみ設定）
+  // オプショナルパラメータ
   if (state.isTsumo) params.set('t', '1')
   if (state.isRiichi) params.set('r', '1')
   if (state.isDoubleRiichi) params.set('dr', '1')
@@ -199,7 +211,7 @@ export type ParseResult =
 
 /**
  * URLSearchParams → LocationState
- * 失敗時はエラー理由を返す
+ * h = 13枚（`-`区切りでグループ構造を保持）, w = 和了牌1枚
  */
 export function searchParamsToLocationState(
   params: URLSearchParams
@@ -209,7 +221,6 @@ export function searchParamsToLocationState(
   const rw = params.get('rw')
   const sw = params.get('sw')
 
-  // 必須パラメータのバリデーション
   if (!h || !w || !rw || !sw) {
     const missing = [
       !h && 'h(手牌)',
@@ -223,20 +234,35 @@ export function searchParamsToLocationState(
   const roundWind = codeToWind(rw)
   const seatWind = codeToWind(sw)
   if (!roundWind || !seatWind) {
-    return { ok: false, error: `風の値が不正です（rw=${rw}, sw=${sw}）。E/S/W/N のいずれかを指定してください` }
+    return {
+      ok: false,
+      error: `風の値が不正です（rw=${rw}, sw=${sw}）。E/S/W/N のいずれかを指定してください`,
+    }
   }
 
-  const tiles = compactStringToTiles(h)
+  // h をグループ区切りでパース
+  const groupStrings = h.split('-')
+  const handGroups = groupStrings.map((g) => compactStringToTiles(g))
+  const handTiles = handGroups.flat()
+
   const winningTiles = compactStringToTiles(w)
 
-  if (tiles.length !== 14) {
-    return { ok: false, error: `手牌(h)は14枚必要です（現在${tiles.length}枚）` }
+  if (handTiles.length !== 13) {
+    return {
+      ok: false,
+      error: `手牌(h)は13枚必要です（現在${handTiles.length}枚）`,
+    }
   }
   if (winningTiles.length !== 1) {
-    return { ok: false, error: `和了牌(w)は1枚で指定してください（現在${winningTiles.length}枚）` }
+    return {
+      ok: false,
+      error: `和了牌(w)は1枚で指定してください（現在${winningTiles.length}枚）`,
+    }
   }
 
   const winningTile = winningTiles[0]
+  // 計算用: 13枚 + 和了牌 = 14枚
+  const tiles = [...handTiles, winningTile]
 
   const doraTilesStr = params.get('dora')
   const uraDoraTilesStr = params.get('ura')
@@ -246,6 +272,7 @@ export function searchParamsToLocationState(
     state: {
       tiles,
       winningTile,
+      handGroups,
       isTsumo: params.get('t') === '1',
       isRiichi: params.get('r') === '1',
       isDoubleRiichi: params.get('dr') === '1',
@@ -253,7 +280,9 @@ export function searchParamsToLocationState(
       seatWind,
       isDealer: seatWind === 'east',
       doraTiles: doraTilesStr ? compactStringToTiles(doraTilesStr) : [],
-      uraDoraTiles: uraDoraTilesStr ? compactStringToTiles(uraDoraTilesStr) : [],
+      uraDoraTiles: uraDoraTilesStr
+        ? compactStringToTiles(uraDoraTilesStr)
+        : [],
       honba: parseInt(params.get('hb') || '0', 10),
       isIppatsu: params.get('ip') === '1',
       isChankan: params.get('ck') === '1',
