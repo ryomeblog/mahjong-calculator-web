@@ -4,7 +4,14 @@
 
 import { useState, useMemo } from 'react'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
-import { IoArrowBack, IoChevronDown, IoChevronUp } from 'react-icons/io5'
+import {
+  IoArrowBack,
+  IoChevronDown,
+  IoChevronUp,
+  IoShareSocialOutline,
+  IoClose,
+  IoCopyOutline,
+} from 'react-icons/io5'
 import { Tile } from '@/components/tiles/Tile'
 import {
   decomposeStandard,
@@ -21,6 +28,7 @@ import {
 } from '@/core/mahjong'
 import {
   searchParamsToLocationState,
+  locationStateToSearchParams,
   type ParseResult,
 } from '@/utils/urlSerializer'
 
@@ -76,6 +84,7 @@ export function Result() {
 
   // 役アコーディオンの状態（Hooksは早期returnの前に宣言）
   const [isYakuOpen, setIsYakuOpen] = useState(true)
+  const [isShareOpen, setIsShareOpen] = useState(false)
 
   if (resolved.error) {
     return <ErrorScreen message={resolved.error} navigate={navigate} />
@@ -275,6 +284,12 @@ export function Result() {
         <h1 className="flex-1 text-center text-xl font-bold text-slate-50">
           計算結果
         </h1>
+        <div
+          onClick={() => setIsShareOpen(true)}
+          className="absolute top-4 right-5 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-slate-700 text-slate-300 hover:bg-slate-600"
+        >
+          <IoShareSocialOutline size={18} />
+        </div>
       </header>
 
       <div className="container-responsive space-y-5 px-5 py-5">
@@ -509,6 +524,13 @@ export function Result() {
           </button>
         </div>
       </div>
+
+      <ShareModal
+        isOpen={isShareOpen}
+        onClose={() => setIsShareOpen(false)}
+        shareUrl={`https://ryomeblog.github.io/mahjong-calculator-web/result?${locationStateToSearchParams(state).toString()}`}
+        shareText={`麻雀点数計算 - ${totalScore.toLocaleString()}点（${han}翻${fuCalculation.total}符）`}
+      />
     </div>
   )
 }
@@ -548,6 +570,112 @@ function ErrorScreen({
             className="w-full rounded-xl bg-blue-600 py-3 text-white hover:bg-blue-700"
           >
             ホームに戻る
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// 共有モーダルコンポーネント
+interface ShareModalProps {
+  isOpen: boolean
+  onClose: () => void
+  shareUrl: string
+  shareText: string
+}
+
+function ShareModal({ isOpen, onClose, shareUrl, shareText }: ShareModalProps) {
+  const [copied, setCopied] = useState(false)
+  const [discordCopied, setDiscordCopied] = useState(false)
+
+  if (!isOpen) return null
+
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(shareUrl)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  const handleDiscordCopy = async () => {
+    await navigator.clipboard.writeText(`${shareText}\n${shareUrl}`)
+    setDiscordCopied(true)
+    setTimeout(() => setDiscordCopied(false), 2000)
+  }
+
+  const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`
+  const lineUrl = `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(shareUrl)}`
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <div
+        className="relative w-full max-w-sm rounded-2xl bg-slate-800 p-6 shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* ヘッダー */}
+        <div className="mb-6 flex items-center justify-between">
+          <h2 className="text-lg font-bold text-slate-50">共有</h2>
+          <div
+            onClick={onClose}
+            className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-slate-700 hover:text-slate-200"
+          >
+            <IoClose size={24} />
+          </div>
+        </div>
+
+        {/* SNSボタン */}
+        <div className="mb-6 flex gap-3">
+          <a
+            href={twitterUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex flex-1 flex-col items-center gap-2 rounded-xl bg-slate-700 p-4 transition-colors hover:bg-slate-600"
+          >
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-black">
+              <span className="text-sm font-bold text-white">𝕏</span>
+            </div>
+            <span className="text-xs text-slate-400">X</span>
+          </a>
+          <a
+            href={lineUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex flex-1 flex-col items-center gap-2 rounded-xl bg-slate-700 p-4 transition-colors hover:bg-slate-600"
+          >
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#06C755]">
+              <span className="text-sm font-bold text-white">LINE</span>
+            </div>
+            <span className="text-xs text-slate-400">LINE</span>
+          </a>
+          <button
+            type="button"
+            onClick={handleDiscordCopy}
+            className="flex flex-1 flex-col items-center gap-2 rounded-xl bg-slate-700 p-4 transition-colors hover:bg-slate-600"
+          >
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#5865F2]">
+              <span className="text-xs font-bold text-white">DC</span>
+            </div>
+            <span className="text-xs text-slate-400">
+              {discordCopied ? 'コピーしました' : 'Discord'}
+            </span>
+          </button>
+        </div>
+
+        {/* URLコピーセクション */}
+        <div className="flex items-center gap-2">
+          <div className="flex-1 truncate rounded-lg bg-slate-900 px-3 py-2 text-xs text-slate-400">
+            {shareUrl}
+          </div>
+          <button
+            type="button"
+            onClick={handleCopy}
+            className="flex items-center gap-1 rounded-lg bg-slate-700 px-3 py-2 text-xs text-slate-300 transition-colors hover:bg-slate-600"
+          >
+            <IoCopyOutline size={14} />
+            {copied ? 'コピーしました' : 'コピー'}
           </button>
         </div>
       </div>
