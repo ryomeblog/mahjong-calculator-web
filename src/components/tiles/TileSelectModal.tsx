@@ -15,11 +15,11 @@ import { TileSvg } from './TileSvg'
 import { TileGrid, isSameTile } from './TileGrid'
 import {
   HandStructureInput,
-  createSlots,
   type HandType,
   type MeldSlot,
 } from './HandStructureInput'
 import { HandTypeModal, HandTypeSettingButton } from './HandTypeModal'
+import { createSlots } from '@/utils/handStructureUtils'
 
 interface TileSelectModalProps {
   /** モーダル表示状態 */
@@ -345,7 +345,7 @@ export function TileSelectModal({
 
   return (
     <>
-      <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
+      <div className="fixed inset-0 z-50 flex items-stretch justify-center sm:items-center">
         {/* オーバーレイ */}
         <div
           className="absolute inset-0 bg-black/60 backdrop-blur-sm"
@@ -353,7 +353,7 @@ export function TileSelectModal({
         />
 
         {/* モーダル本体 */}
-        <div className="relative mx-2 flex max-h-[90vh] w-full max-w-[95vw] flex-col rounded-t-2xl bg-slate-800 sm:mx-4 sm:max-w-none sm:rounded-2xl">
+        <div className="relative mx-0 flex h-full w-full flex-col bg-slate-800 sm:mx-4 sm:h-auto sm:max-h-[90vh] sm:max-w-none sm:rounded-2xl">
           {/* ヘッダー */}
           <div className="flex items-center justify-between border-b border-slate-700 p-4">
             <h3 className="text-base font-bold text-slate-50 sm:text-lg">
@@ -375,7 +375,7 @@ export function TileSelectModal({
           </div>
 
           {/* 選択中の牌 / 手牌構造 */}
-          <div className="max-h-[200px] overflow-y-auto border-b border-slate-700 bg-slate-900 p-4">
+          <div className="h-[400px] min-h-[400px] overflow-y-auto border-b border-slate-700 bg-slate-900 p-4">
             <div className="mb-3 flex items-center justify-between">
               <p className="text-sm font-bold text-slate-300">
                 {isHandMode
