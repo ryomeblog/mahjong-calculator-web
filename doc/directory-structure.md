@@ -167,7 +167,7 @@ mahjong-calculator-web/
 │   └── extensions.json
 │
 ├── public/                       # 公開ディレクトリ
-│   └── vite.svg
+│   └── logo.png
 │
 ├── index.html                    # HTMLエントリーポイント
 ├── vite.config.ts                # Vite設定
@@ -189,6 +189,7 @@ mahjong-calculator-web/
 **責務**: 麻雀のルールロジックを純粋関数として実装
 
 #### 特徴
+
 - **副作用なし**: すべて純粋関数
 - **フレームワーク非依存**: React に依存しない
 - **高いテスタビリティ**: ユニットテスト容易
@@ -197,14 +198,17 @@ mahjong-calculator-web/
 #### サブディレクトリ
 
 ##### `types/` - 型定義
+
 アプリケーション全体で使用する型を定義。
 
 **命名規則**:
+
 - 型名は PascalCase
 - ファイル名は kebab-case
 - export のみ（実装なし）
 
 **例**:
+
 ```typescript
 // types/tile.ts
 export type TileType = 'man' | 'pin' | 'sou' | 'wind' | 'dragon'
@@ -218,9 +222,11 @@ export interface Tile {
 ```
 
 ##### `constants/` - 定数定義
+
 マジックナンバーを排除し、定数を一元管理。
 
 **例**:
+
 ```typescript
 // constants/yaku.ts
 export const YAKU_DEFINITIONS = {
@@ -232,9 +238,11 @@ export const YAKU_DEFINITIONS = {
 ```
 
 ##### `utils/` - ユーティリティ関数
+
 牌の操作、ソート、バリデーションなど汎用的な関数。
 
 **例**:
+
 ```typescript
 // utils/tile-utils.ts
 export function isSameTile(a: Tile, b: Tile): boolean
@@ -244,17 +252,21 @@ export function sortTiles(tiles: Tile[]): Tile[]
 ```
 
 ##### `parser/` - 牌解析
+
 手牌の入力を解析し、内部表現に変換。
 
 **主要関数**:
+
 - `parseTiles()`: 牌の配列を解析
 - `validateHand()`: 手牌の妥当性検証
 - `normalizeHand()`: 牌の正規化（ソート等）
 
 ##### `decomposer/` - 面子分解
+
 手牌を面子と雀頭に分解する。最も複雑なロジック。
 
 **主要関数**:
+
 - `decomposeMelds()`: 標準形の分解（再帰的）
 - `detectSpecialForms()`: 特殊形の判定
 - `getAllPatterns()`: すべての分解パターンを取得
@@ -262,27 +274,32 @@ export function sortTiles(tiles: Tile[]): Tile[]
 **アルゴリズム**: バックトラッキング
 
 ##### `yaku/` - 役判定
+
 面子分解結果から役を判定。約40種類の役に対応。
 
 **構成**:
+
 - `one-han/`: 1翻役（リーチ、タンヤオ等）
 - `two-han/`: 2翻役（三色、一気通貫等）
 - `yakuman/`: 役満（国士無双、四暗刻等）
 - `helpers/`: 共通ヘルパー関数
 
 **各役の実装**:
+
 ```typescript
 // yaku/one-han/tanyao.ts
 export function isTanyao(meldGroup: MeldGroup): boolean {
   // 么九牌が含まれていないか判定
-  return !meldGroup.tiles.some(tile => isTerminalOrHonor(tile))
+  return !meldGroup.tiles.some((tile) => isTerminalOrHonor(tile))
 }
 ```
 
 ##### `fu/` - 符計算
+
 和了形から符を計算。
 
 **計算要素**:
+
 - 副底: 20符
 - 面子の符: 刻子・槓子の符
 - 雀頭の符: 役牌の符
@@ -290,9 +307,11 @@ export function isTanyao(meldGroup: MeldGroup): boolean {
 - 和了方法の符: ツモ和了
 
 ##### `score/` - 点数計算
+
 符と翻から最終的な点数を計算。
 
 **計算式**:
+
 - 基本点 = 符 × 2^(翻+2)
 - 満貫以上の判定
 - 親・子の支払い計算
@@ -304,6 +323,7 @@ export function isTanyao(meldGroup: MeldGroup): boolean {
 **責務**: 機能単位でUI層と状態管理層をまとめる
 
 #### 設計方針
+
 - **Feature-based organization**: 機能ごとにフォルダを分ける
 - **Colocation**: 関連するコードを近くに配置
 - **自己完結**: 各機能は独立して動作可能
@@ -318,29 +338,36 @@ export function isTanyao(meldGroup: MeldGroup): boolean {
 ```
 
 ##### `hand-input/` - 手牌入力機能
+
 牌を選択して手牌を構築するUI。
 
 **コンポーネント**:
+
 - `TileInputPanel`: 全体のパネル
 - `TileSelector`: 牌の種類選択
 - `HandDisplay`: 現在の手牌表示
 - `TileButton`: 個々の牌ボタン
 
 **フック**:
+
 - `useHandInput`: 手牌の追加・削除ロジック
 
 ##### `conditions/` - 和了条件入力
+
 リーチ、ツモ、ドラ枚数などの条件を入力。
 
 **コンポーネント**:
+
 - `WinningConditionsPanel`: 条件入力パネル
 - `ConditionCheckbox`: チェックボックス
 - `WindSelector`: 風の選択
 
 ##### `calculation/` - 点数計算機能
+
 計算実行と結果表示。
 
 **フック**:
+
 - `useCalculation`: 計算実行ロジック（core/mahjongを呼び出し）
 
 ---
@@ -352,14 +379,17 @@ export function isTanyao(meldGroup: MeldGroup): boolean {
 #### サブディレクトリ
 
 ##### `ui/` - 汎用UIコンポーネント
+
 ボタン、カード、チェックボックスなどの基本的なUI部品。
 
 **設計方針**:
+
 - Tailwind CSS でスタイリング
 - プロパティで見た目をカスタマイズ可能
 - アクセシビリティ対応
 
 **例**:
+
 ```typescript
 // ui/Button.tsx
 interface ButtonProps {
@@ -371,9 +401,11 @@ interface ButtonProps {
 ```
 
 ##### `layout/` - レイアウトコンポーネント
+
 ヘッダー、フッター、コンテナなど。
 
 ##### `feedback/` - フィードバックコンポーネント
+
 エラーメッセージ、ローディング、エラーバウンダリ。
 
 ---
@@ -383,6 +415,7 @@ interface ButtonProps {
 **責務**: アプリケーション全体で使用する汎用フック
 
 **例**:
+
 - `useLocalStorage`: ローカルストレージへの永続化
 - `useDebounce`: 入力のデバウンス処理
 
@@ -391,11 +424,13 @@ interface ButtonProps {
 ### 5. `tests/` - テスト
 
 #### 構成
+
 - `unit/`: ユニットテスト（主にcore/mahjong）
 - `integration/`: 統合テスト
 - `e2e/`: E2Eテスト
 
 #### テストツール
+
 - **Vitest**: ユニット・統合テスト
 - **Testing Library**: Reactコンポーネントテスト
 - **Playwright**: E2Eテスト（オプション）
@@ -406,24 +441,24 @@ interface ButtonProps {
 
 ### ファイル命名
 
-| 種類 | 規則 | 例 |
-|------|------|-----|
-| Reactコンポーネント | PascalCase.tsx | `TileSelector.tsx` |
-| フック | use*.ts | `useHandInput.ts` |
-| 型定義 | kebab-case.ts | `tile.ts`, `meld.ts` |
-| ユーティリティ | kebab-case.ts | `tile-utils.ts` |
-| 定数 | kebab-case.ts | `yaku.ts`, `tiles.ts` |
-| テスト | *.test.ts(x) | `parser.test.ts` |
+| 種類                | 規則           | 例                    |
+| ------------------- | -------------- | --------------------- |
+| Reactコンポーネント | PascalCase.tsx | `TileSelector.tsx`    |
+| フック              | use\*.ts       | `useHandInput.ts`     |
+| 型定義              | kebab-case.ts  | `tile.ts`, `meld.ts`  |
+| ユーティリティ      | kebab-case.ts  | `tile-utils.ts`       |
+| 定数                | kebab-case.ts  | `yaku.ts`, `tiles.ts` |
+| テスト              | \*.test.ts(x)  | `parser.test.ts`      |
 
 ### 変数・関数命名
 
-| 種類 | 規則 | 例 |
-|------|------|-----|
-| 変数 | camelCase | `handTiles`, `winningTile` |
-| 定数 | UPPER_SNAKE_CASE | `MAX_TILES`, `YAKU_DEFINITIONS` |
-| 関数 | camelCase | `calculateScore`, `validateHand` |
-| 型・インターフェース | PascalCase | `Tile`, `MeldGroup` |
-| コンポーネント | PascalCase | `TileSelector`, `HandDisplay` |
+| 種類                 | 規則             | 例                               |
+| -------------------- | ---------------- | -------------------------------- |
+| 変数                 | camelCase        | `handTiles`, `winningTile`       |
+| 定数                 | UPPER_SNAKE_CASE | `MAX_TILES`, `YAKU_DEFINITIONS`  |
+| 関数                 | camelCase        | `calculateScore`, `validateHand` |
+| 型・インターフェース | PascalCase       | `Tile`, `MeldGroup`              |
+| コンポーネント       | PascalCase       | `TileSelector`, `HandDisplay`    |
 
 ---
 
@@ -512,6 +547,7 @@ export type { Tile, MeldGroup, YakuItem } from './types'
 ```
 
 **メリット**:
+
 - 内部実装の隠蔽
 - インポートパスの簡潔化
 - リファクタリング容易性

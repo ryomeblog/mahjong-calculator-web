@@ -1,73 +1,238 @@
-# React + TypeScript + Vite
+# 麻雀点数計算機 (Mahjong Score Calculator)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+麻雀の手牌を入力して点数を自動計算するWebアプリケーションです。
 
-Currently, two official plugins are available:
+**デプロイ先:** https://ryomeblog.github.io/mahjong-calculator-web/
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 技術スタック
 
-## React Compiler
+- Vite 7 + React 19 + TypeScript (strict mode)
+- Tailwind CSS 4
+- React Router DOM 7
+- GitHub Pages にデプロイ
 
-The React Compiler is currently not compatible with SWC. See [this issue](https://github.com/vitejs/vite-plugin-react/issues/428) for tracking the progress.
+## 開発
 
-## Expanding the ESLint configuration
+```bash
+# 依存関係のインストール
+npm install
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+# 開発サーバー起動
+npm run dev
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+# TypeScriptチェック + プロダクションビルド
+npm run build
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+# プロダクションビルドのプレビュー
+npm run preview
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# ESLint実行
+npm run lint
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 使い方
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### 1. ホーム画面から入力する方法
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+1. ホーム画面で「手牌を選択」をタップして14枚の手牌を入力します
+2. 和了牌（最後の1枚）を含めた14枚を選択してください
+3. 場風（東/南/西/北）と自風を設定します
+4. 和了方法（ツモ/ロン）、リーチなどの条件を設定します
+5. 必要に応じてドラ表示牌・裏ドラ表示牌・本場数を設定します
+6. 「点数を計算」ボタンを押すと結果画面に遷移します
+
+### 2. URLから直接結果を表示する方法（URL共有）
+
+結果画面のURLにクエリパラメータを付けることで、URLを共有するだけで同じ結果を表示できます。
+
+#### URL形式
+
 ```
+https://ryomeblog.github.io/mahjong-calculator-web/result?h=<手牌>&w=<和了牌>&rw=<場風>&sw=<自風>&...
+```
+
+#### 牌の表記形式（天鳳形式）
+
+天鳳で使用されている牌表記を採用しています。数字の後にスーツ文字を付けて表します。同じスーツの牌はまとめて記述できます。
+
+| 種類 | 表記 | 牌 |
+|---|---|---|
+| 萬子(m) | `1m`〜`9m` | 一萬〜九萬 |
+| 筒子(p) | `1p`〜`9p` | 一筒〜九筒 |
+| 索子(s) | `1s`〜`9s` | 一索〜九索 |
+| 赤五萬 | `0m` | 赤ドラの五萬 |
+| 赤五筒 | `0p` | 赤ドラの五筒 |
+| 赤五索 | `0s` | 赤ドラの五索 |
+| 東 | `1z` | 東風 |
+| 南 | `2z` | 南風 |
+| 西 | `3z` | 西風 |
+| 北 | `4z` | 北風 |
+| 白 | `5z` | 白(三元牌) |
+| 發 | `6z` | 發(三元牌) |
+| 中 | `7z` | 中(三元牌) |
+
+**グルーピング記法:** 同じスーツの牌は数字をまとめて書けます。
+
+```
+123m  → 一萬 二萬 三萬
+456p  → 四筒 五筒 六筒
+789s  → 七索 八索 九索
+11z   → 東 東
+```
+
+**例:** `123m456p789s11z` は 一萬二萬三萬 四筒五筒六筒 七索八索九索 東東 で計11枚です。
+
+**重要: 手牌(`h`)は必ず14枚になるようにしてください。** 14枚でない場合はエラーになります。
+
+#### クエリパラメータ一覧
+
+| パラメータ | 内容 | 必須 | 値 | 例 |
+|---|---|---|---|---|
+| `h` | 手牌（14枚） | Yes | 天鳳形式の牌表記 | `123m456p789s1155z` |
+| `w` | 和了牌（1枚） | Yes | 天鳳形式の牌表記 | `5z` |
+| `rw` | 場風 | Yes | `E`(東) / `S`(南) / `W`(西) / `N`(北) | `E` |
+| `sw` | 自風 | Yes | `E`(東) / `S`(南) / `W`(西) / `N`(北) | `E` |
+| `t` | ツモ | No | `1`=ツモ / `0`=ロン(default) | `1` |
+| `r` | リーチ | No | `1`=あり / `0`=なし(default) | `1` |
+| `dr` | ダブルリーチ | No | `1`=あり / `0`=なし(default) | `1` |
+| `dora` | ドラ表示牌 | No | 天鳳形式の牌表記 | `5m1p` |
+| `ura` | 裏ドラ表示牌 | No | 天鳳形式の牌表記 | `2p` |
+| `hb` | 本場 | No | 数値(default `0`) | `1` |
+| `ip` | 一発 | No | `1`=あり / `0`=なし(default) | `1` |
+| `ck` | 槍槓 | No | `1`=あり / `0`=なし(default) | `1` |
+| `rs` | 嶺上開花 | No | `1`=あり / `0`=なし(default) | `1` |
+| `ht` | 海底摸月 | No | `1`=あり / `0`=なし(default) | `1` |
+| `ho` | 河底撈魚 | No | `1`=あり / `0`=なし(default) | `1` |
+| `th` | 天和 | No | `1`=あり / `0`=なし(default) | `1` |
+| `ch` | 地和 | No | `1`=あり / `0`=なし(default) | `1` |
+
+#### URL作成のサンプル
+
+**サンプル1: リーチ・ツモ・平和（メンゼンツモ）**
+
+手牌: 一二三萬 四五六筒 七八九索 東東 + 白白 （14枚）
+
+```
+h=123m456p789s1155z
+w=5z
+rw=E (場風=東)
+sw=E (自風=東)
+t=1  (ツモ)
+r=1  (リーチ)
+```
+
+URL:
+```
+/result?h=123m456p789s1155z&w=5z&rw=E&sw=E&t=1&r=1
+```
+
+**サンプル2: タンヤオ・ロン**
+
+手牌: 二三四萬 五六七萬 三四五筒 二二索 + 八八索 （14枚）
+
+```
+h=234567m345p2288s
+w=8s
+rw=E (場風=東)
+sw=S (自風=南)
+```
+
+URL:
+```
+/result?h=234567m345p2288s&w=8s&rw=E&sw=S
+```
+
+**サンプル3: リーチ・一発・ツモ + ドラあり**
+
+手牌: 一一一萬 二三四筒 六七八索 九九九索 + 白白 （14枚）
+
+```
+h=111m234p678999s55z
+w=5z
+rw=E
+sw=S
+t=1    (ツモ)
+r=1    (リーチ)
+ip=1   (一発)
+dora=3m (ドラ表示牌=三萬 → ドラは四萬)
+```
+
+URL:
+```
+/result?h=111m234p678999s55z&w=5z&rw=E&sw=S&t=1&r=1&ip=1&dora=3m
+```
+
+**サンプル4: 赤ドラ入り**
+
+手牌に赤五萬を含む場合、`0m`と表記します。
+
+```
+h=1230m456p789s11z  → 一萬 二萬 三萬 赤五萬 四筒 五筒 六筒 七索 八索 九索 東 東 (12枚 → 14枚にはさらに2枚必要)
+```
+
+赤ドラの正しい例（14枚）:
+```
+h=120m3m456p789s11z
+```
+↑ この場合は `1m`, `2m`, `0m`(赤五萬), `3m`, `4p`, `5p`, `6p`, `7s`, `8s`, `9s`, `1z`, `1z` で12枚です。
+
+14枚の正しい例:
+```
+h=1230m456p789s1177z
+```
+→ 一萬 二萬 三萬 赤五萬 四筒 五筒 六筒 七索 八索 九索 東東 中中 = 14枚
+
+**サンプル5: 七対子**
+
+手牌: 一一萬 三三筒 五五索 東東 南南 白白 中中 （14枚）
+
+```
+h=11m33p55s112255z
+```
+
+URL:
+```
+/result?h=11m33p55s112255z&w=7z&rw=E&sw=S
+```
+
+**サンプル6: 国士無双**
+
+手牌: 一九萬 一九筒 一九索 東南西北 白發中 + 中 （14枚）
+
+```
+h=19m19p19s12345677z
+```
+
+URL:
+```
+/result?h=19m19p19s12345677z&w=7z&rw=E&sw=S&t=1
+```
+
+#### 牌数の数え方のコツ
+
+URLを手動で作成する際は、**必ず14枚になっているか確認**してください。
+
+数え方:
+- スーツ文字(`m`, `p`, `s`, `z`)の**前にある数字の個数**がそのグループの牌数です
+- すべてのグループの牌数を合計して14になればOKです
+
+例: `123m456p789s1155z`
+- `123m` → 3枚（萬子）
+- `456p` → 3枚（筒子）
+- `789s` → 3枚（索子）
+- `1155z` → 4枚（字牌: 東東白白）
+- 合計: 3 + 3 + 3 + 4 = **13枚** → 14枚ではないのでエラーになります
+
+修正例: `123m456p789s11556z` (發を追加して14枚に)
+
+## デプロイ
+
+GitHub Pages に自動デプロイされます。
+
+- `main` ブランチへのpushで `.github/workflows/deploy.yml` が実行されます
+- `vite.config.ts` の `base` は `/mahjong-calculator-web/` に設定済み
+- GitHub設定でPages SourceをGitHub Actionsに変更が必要
+
+## ライセンス
+
+MIT
