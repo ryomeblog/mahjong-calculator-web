@@ -213,7 +213,7 @@ export function searchParamsToLocationState(
 
   const tiles = compactStringToTiles(h)
   const winningTiles = compactStringToTiles(w)
-  if (tiles.length === 0 || winningTiles.length === 0) return null
+  if (tiles.length !== 14 || winningTiles.length !== 1) return null
 
   const winningTile = winningTiles[0]
 

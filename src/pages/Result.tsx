@@ -153,6 +153,16 @@ export function Result() {
     redDoraCount,
   }
 
+  // 手牌枚数バリデーション
+  if (tiles.length !== 14) {
+    return (
+      <ErrorScreen
+        message={`手牌は14枚である必要があります（現在${tiles.length}枚）`}
+        navigate={navigate}
+      />
+    )
+  }
+
   // 特殊形を先にチェック（七対子、国士無双）
   const specialForms = detectSpecialForms(tiles, winningTile)
 
