@@ -49,19 +49,34 @@ export function createSlots(handType: HandType): MeldSlot[] {
         },
       ]
     case 'chiitoitsu':
-      return Array.from({ length: 7 }, (_, i) => ({
-        tiles: [null, null],
-        maxTiles: 2,
-        label: `対子${i + 1}`,
-      }))
+      return [
+        ...Array.from({ length: 7 }, (_, i) => ({
+          tiles: [null, null],
+          maxTiles: 2,
+          label: `対子${i + 1}`,
+          sidewaysTiles: new Set<number>(),
+        })),
+        {
+          tiles: [null],
+          maxTiles: 1,
+          label: '上がり牌',
+          sidewaysTiles: new Set<number>(),
+        },
+      ]
     case 'kokushi':
       return [
         {
           tiles: Array(13).fill(null),
           maxTiles: 13,
           label: '么九牌13種',
+          sidewaysTiles: new Set<number>(),
         },
-        { tiles: [null], maxTiles: 1, label: '雀頭' },
+        {
+          tiles: [null],
+          maxTiles: 1,
+          label: '上がり牌',
+          sidewaysTiles: new Set<number>(),
+        },
       ]
   }
 }

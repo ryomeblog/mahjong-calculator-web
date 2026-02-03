@@ -17,6 +17,7 @@ import {
   type Wind,
   type WinningConditions,
   type MeldGroup,
+  type SpecialForm,
 } from '@/core/mahjong'
 
 interface LocationState {
@@ -76,15 +77,6 @@ export function Result() {
     isChiihou = false,
   } = state
 
-  // 面子分解
-  const meldGroups = decomposeStandard(tiles, winningTile)
-  const specialForms = detectSpecialForms(tiles, winningTile)
-  const allForms = [...meldGroups, ...specialForms]
-
-  if (allForms.length === 0) {
-    return <ErrorScreen message="面子分解に失敗しました" navigate={navigate} />
-  }
-
   // 赤ドラカウント
   const redDoraCount = tiles.filter((t) => t.isRed).length
 
@@ -108,15 +100,33 @@ export function Result() {
     redDoraCount,
   }
 
-  const firstForm = allForms[0]
-  const meldGroup = 'melds' in firstForm ? firstForm : meldGroups[0]
+  // 特殊形を先にチェック（七対子、国士無双）
+  const specialForms = detectSpecialForms(tiles, winningTile)
 
-  if (!meldGroup) {
-    return <ErrorScreen message="面子分解に失敗しました" navigate={navigate} />
+  // 特殊形がある場合はそれを使用、なければ標準形で分解
+  let meldGroup: MeldGroup
+  let yakuList: ReturnType<typeof detectYaku>
+  let specialForm: SpecialForm | null = null
+
+  if (specialForms.length > 0) {
+    // 特殊形（七対子、国士無双）の場合
+    specialForm = specialForms[0]
+    // SpecialFormをMeldGroupに変換（ダミーの面子構成を作成）
+    meldGroup = convertSpecialFormToMeldGroup(specialForm)
+    yakuList = detectYaku(meldGroup, conditions)
+  } else {
+    // 標準形の場合
+    const meldGroups = decomposeStandard(tiles, winningTile)
+
+    if (meldGroups.length === 0) {
+      return (
+        <ErrorScreen message="面子分解に失敗しました" navigate={navigate} />
+      )
+    }
+
+    meldGroup = meldGroups[0]
+    yakuList = detectYaku(meldGroup, conditions)
   }
-
-  // 役判定
-  const yakuList = detectYaku(meldGroup, conditions)
 
   if (yakuList.length === 0) {
     return (
@@ -454,11 +464,56 @@ function ErrorScreen({
   )
 }
 
+/**
+ * SpecialFormをMeldGroupに変換（七対子・国士無双用のダミー面子構成）
+ */
+function convertSpecialFormToMeldGroup(specialForm: SpecialForm): MeldGroup {
+  const { tiles, winningTile, type } = specialForm
+
+  // ダミーの雀頭を作成（最初の2枚）
+  const dummyPair: MeldGroup['pair'] = {
+    type: 'pair',
+    tiles: [tiles[0], tiles[1]],
+    isConcealed: true,
+  }
+
+  // ダミーの面子を作成（残りの牌を3枚ずつに分割）
+  const dummyMelds: MeldGroup['melds'] = [
+    {
+      type: 'sequence',
+      tiles: [tiles[2], tiles[3], tiles[4]],
+      isConcealed: true,
+    },
+    {
+      type: 'sequence',
+      tiles: [tiles[5], tiles[6], tiles[7]],
+      isConcealed: true,
+    },
+    {
+      type: 'sequence',
+      tiles: [tiles[8], tiles[9], tiles[10]],
+      isConcealed: true,
+    },
+    {
+      type: 'sequence',
+      tiles: [tiles[11], tiles[12], tiles[13]],
+      isConcealed: true,
+    },
+  ]
+
+  return {
+    melds: dummyMelds,
+    pair: dummyPair,
+    wait: 'tanki',
+    winningTile,
+    isSpecial: true,
+    specialType: type,
+  }
+}
+
 // 手牌表示コンポーネント（ホーム画面と同じ表示）
 function HandDisplay({
   meldGroup,
-  winningTile,
-  tiles,
   handSlots,
 }: {
   meldGroup: MeldGroup
