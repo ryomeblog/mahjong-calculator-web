@@ -443,7 +443,7 @@ export function TileSelectModal({
           </div>
 
           {/* 牌グリッド */}
-          <div className="h-[385px] min-h-[385px] overflow-y-auto border-t border-slate-700 p-4">
+          <div className="h-[355px] min-h-[355px] overflow-y-auto border-t border-slate-700 p-2">
             {(isHandMode || isDoraMode) && selectedSlotIndex !== null && (
               <p className="mb-3 text-sm text-slate-400">
                 {slots[selectedSlotIndex].label}に追加する牌を選択
