@@ -23,6 +23,7 @@ import {
   type Tile as TileType,
   type Wind,
   type WinningConditions,
+  type Meld,
   type MeldGroup,
   type SpecialForm,
 } from '@/core/mahjong'
@@ -37,6 +38,7 @@ interface LocationState {
   winningTile: TileType
   handSlots?: import('@/components/tiles/HandStructureInput').MeldSlot[] | null
   handGroups?: readonly (readonly TileType[])[]
+  openGroups?: readonly number[]
   isTsumo: boolean
   isRiichi: boolean
   isDoubleRiichi: boolean
@@ -195,6 +197,13 @@ export function Result() {
     )
   }
 
+  // 鳴き面子の牌グループを取得
+  const openMeldTiles = getOpenMeldTiles(
+    handSlots,
+    state.openGroups,
+    state.handGroups
+  )
+
   // 特殊形を先にチェック（七対子、国士無双）
   const specialForms = detectSpecialForms(tiles, winningTile)
 
@@ -219,7 +228,8 @@ export function Result() {
       )
     }
 
-    meldGroup = meldGroups[0]
+    // 鳴き面子の情報を反映
+    meldGroup = applyOpenMelds(meldGroups[0], openMeldTiles)
     yakuList = detectYaku(meldGroup, conditions)
   }
 
@@ -533,6 +543,86 @@ export function Result() {
       />
     </div>
   )
+}
+
+// 牌を一意に識別するキー生成
+function tileKey(t: TileType): string {
+  if (t.type === 'man' || t.type === 'pin' || t.type === 'sou') {
+    return `${t.type}${t.number}${t.isRed ? 'r' : ''}`
+  }
+  if (t.type === 'wind') return `wind-${t.wind}`
+  if (t.type === 'dragon') return `dragon-${t.dragon}`
+  return 'unknown'
+}
+
+// 面子の牌キーをソートして結合
+function meldTileKey(tiles: readonly TileType[]): string {
+  return [...tiles].map(tileKey).sort().join('+')
+}
+
+// handSlots または openGroups + handGroups から鳴き面子の牌グループを取得
+function getOpenMeldTiles(
+  handSlots:
+    | import('@/components/tiles/HandStructureInput').MeldSlot[]
+    | null
+    | undefined,
+  openGroups: readonly number[] | undefined,
+  handGroups: readonly (readonly TileType[])[] | undefined
+): readonly TileType[][] {
+  // handSlots がある場合（直接ナビゲーション）
+  if (handSlots && handSlots.length > 1) {
+    const result: TileType[][] = []
+    const meldSlots = handSlots.slice(0, -1) // 和了牌スロットを除く
+    for (const slot of meldSlots) {
+      if (slot.sidewaysTiles && slot.sidewaysTiles.size > 0) {
+        const tiles = slot.tiles.filter((t): t is TileType => t !== null)
+        if (tiles.length > 0) {
+          result.push(tiles)
+        }
+      }
+    }
+    return result
+  }
+
+  // openGroups + handGroups がある場合（URL経由）
+  if (openGroups && openGroups.length > 0 && handGroups) {
+    return openGroups
+      .filter((idx) => idx >= 0 && idx < handGroups.length)
+      .map((idx) => [...handGroups[idx]])
+  }
+
+  return []
+}
+
+// 分解結果に鳴き面子の情報を反映
+function applyOpenMelds(
+  meldGroup: MeldGroup,
+  openMeldTiles: readonly (readonly TileType[])[]
+): MeldGroup {
+  if (openMeldTiles.length === 0) return meldGroup
+
+  // 鳴き面子のキーとカウント
+  const openKeys = new Map<string, number>()
+  for (const group of openMeldTiles) {
+    const key = meldTileKey(group)
+    openKeys.set(key, (openKeys.get(key) || 0) + 1)
+  }
+
+  // 一致する面子を isConcealed: false にする
+  const newMelds = meldGroup.melds.map((meld) => {
+    const key = meldTileKey(meld.tiles)
+    const count = openKeys.get(key) || 0
+    if (count > 0) {
+      openKeys.set(key, count - 1)
+      return { ...meld, isConcealed: false }
+    }
+    return meld
+  })
+
+  return {
+    ...meldGroup,
+    melds: newMelds as [Meld, Meld, Meld, Meld],
+  }
 }
 
 // エラー画面コンポーネント

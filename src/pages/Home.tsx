@@ -234,11 +234,27 @@ export function Home() {
     if (selectedTiles.length === 14 && winningTile) {
       // handSlotsからグループ構造を取得（和了牌スロットを除いた13枚）
       let handGroups: Tile[][] | undefined
+      let openGroups: number[] | undefined
       if (handSlots && handSlots.length > 1) {
-        handGroups = handSlots
-          .slice(0, -1)
+        const meldSlots = handSlots.slice(0, -1)
+        handGroups = meldSlots
           .map((slot) => slot.tiles.filter((t): t is Tile => t !== null))
           .filter((group) => group.length > 0)
+        // 鳴いているスロット（sidewaysTilesがある）のインデックスを記録
+        const openIndices: number[] = []
+        // handGroupsのインデックスに合わせるため、空でないスロットのみカウント
+        let groupIdx = 0
+        for (const slot of meldSlots) {
+          const hasTiles = slot.tiles.some((t) => t !== null)
+          if (!hasTiles) continue
+          if (slot.sidewaysTiles && slot.sidewaysTiles.size > 0) {
+            openIndices.push(groupIdx)
+          }
+          groupIdx++
+        }
+        if (openIndices.length > 0) {
+          openGroups = openIndices
+        }
       }
 
       const stateData = {
@@ -246,6 +262,7 @@ export function Home() {
         winningTile,
         handSlots,
         handGroups,
+        openGroups,
         isTsumo,
         isRiichi,
         isDoubleRiichi,

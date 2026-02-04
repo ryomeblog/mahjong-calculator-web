@@ -30,7 +30,7 @@ export interface Meld {
 export interface Sequence extends Meld {
   readonly type: 'sequence'
   readonly tiles: readonly [Tile, Tile, Tile]
-  readonly isConcealed: true // 順子は常に暗
+  readonly isConcealed: boolean // チーした順子は明（false）
 }
 
 /**

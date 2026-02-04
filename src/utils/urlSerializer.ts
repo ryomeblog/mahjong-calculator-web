@@ -138,6 +138,7 @@ interface LocationState {
   tiles: readonly Tile[]
   winningTile: Tile
   handGroups?: readonly (readonly Tile[])[]
+  openGroups?: readonly number[]
   isTsumo: boolean
   isRiichi: boolean
   isDoubleRiichi: boolean
@@ -201,6 +202,9 @@ export function locationStateToSearchParams(
   if (state.isHoutei) params.set('ho', '1')
   if (state.isTenhou) params.set('th', '1')
   if (state.isChiihou) params.set('ch', '1')
+  if (state.openGroups && state.openGroups.length > 0) {
+    params.set('og', state.openGroups.join(','))
+  }
 
   return params
 }
@@ -266,6 +270,13 @@ export function searchParamsToLocationState(
 
   const doraTilesStr = params.get('dora')
   const uraDoraTilesStr = params.get('ura')
+  const ogStr = params.get('og')
+  const openGroups = ogStr
+    ? ogStr
+        .split(',')
+        .map(Number)
+        .filter((n) => !isNaN(n))
+    : undefined
 
   return {
     ok: true,
@@ -273,6 +284,7 @@ export function searchParamsToLocationState(
       tiles,
       winningTile,
       handGroups,
+      openGroups,
       isTsumo: params.get('t') === '1',
       isRiichi: params.get('r') === '1',
       isDoubleRiichi: params.get('dr') === '1',
