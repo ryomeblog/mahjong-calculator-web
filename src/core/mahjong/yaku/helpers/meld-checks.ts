@@ -2,9 +2,9 @@
  * 面子チェックヘルパー
  */
 
-import type { MeldGroup, Sequence, Triplet } from '../../types'
+import type { MeldGroup, Sequence, Triplet, WinningConditions } from '../../types'
 import { isSequence, isTriplet, isKong, isDragonTile, isWindTile } from '../../utils/type-guards'
-import { isTerminalOrHonor } from '../../utils/tile-utils'
+import { isTerminalOrHonor, isSameTile } from '../../utils/tile-utils'
 
 /**
  * すべて順子かどうか
@@ -34,6 +34,32 @@ export function countConcealedTriplets(meldGroup: MeldGroup): number {
   return meldGroup.melds.filter(
     (m) => (isTriplet(m) || isKong(m)) && m.isConcealed
   ).length
+}
+
+/**
+ * ロン和了時の暗刻補正を含む暗刻・暗槓カウント
+ * 双碰待ちでロンの場合、和了牌で完成した刻子は明刻として扱う
+ */
+export function countEffectiveConcealedTriplets(
+  meldGroup: MeldGroup,
+  conditions: WinningConditions
+): number {
+  let count = countConcealedTriplets(meldGroup)
+
+  // ロン和了 + 双碰待ちの場合、和了牌で完成した暗刻を1つ減らす
+  if (!conditions.isTsumo && meldGroup.wait === 'shanpon') {
+    const hasRonTriplet = meldGroup.melds.some(
+      (m) =>
+        (isTriplet(m) || isKong(m)) &&
+        m.isConcealed &&
+        m.tiles.some((t) => isSameTile(t, meldGroup.winningTile))
+    )
+    if (hasRonTriplet) {
+      count--
+    }
+  }
+
+  return count
 }
 
 /**

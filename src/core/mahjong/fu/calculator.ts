@@ -3,7 +3,7 @@
  */
 
 import type { MeldGroup, WinningConditions, FuCalculation } from '../types'
-import { calculateMeldFu } from './meld-fu'
+import { calculateMeldFu, getRonTripletTile } from './meld-fu'
 import { calculatePairFu } from './pair-fu'
 import { calculateWaitFu } from './wait-fu'
 import { isPinfu } from '../yaku/one-han/pinfu'
@@ -52,7 +52,12 @@ export function calculateFu(
 
   // 通常の符計算
   const baseFu = 20 // 副底
-  const meldsFu = calculateMeldFu(meldGroup.melds)
+  const ronTripletTile = getRonTripletTile(
+    conditions.isTsumo,
+    meldGroup.wait,
+    meldGroup.winningTile
+  )
+  const meldsFu = calculateMeldFu(meldGroup.melds, ronTripletTile)
   const pairFu = calculatePairFu(meldGroup.pair, conditions)
   const waitFu = calculateWaitFu(meldGroup.wait)
   const tsumoFu = conditions.isTsumo ? 2 : 0

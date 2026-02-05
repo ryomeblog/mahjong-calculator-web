@@ -144,7 +144,7 @@ export function detectYaku(
     yaku.push(createYakuItem('toitoi', isOpen))
   }
 
-  if (isSanankou(meldGroup)) {
+  if (isSanankou(meldGroup, conditions)) {
     yaku.push(createYakuItem('sanankou', isOpen))
   }
 
@@ -221,7 +221,7 @@ function detectYakuman(
     return yakuman
   }
 
-  if (isSuuankouTanki(meldGroup)) {
+  if (isSuuankouTanki(meldGroup, conditions)) {
     yakuman.push(createYakuItem('suuankou-tanki'))
     return yakuman
   }
@@ -236,7 +236,7 @@ function detectYakuman(
     yakuman.push(createYakuItem('chuuren'))
   }
 
-  if (isSuuankou(meldGroup)) {
+  if (isSuuankou(meldGroup, conditions)) {
     yakuman.push(createYakuItem('suuankou'))
   }
 
