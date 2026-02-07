@@ -276,13 +276,26 @@ export function TileSelectModal({
         0
       )
 
-      // 非上がりスロットの上限に達している場合、上がり牌スロットへ移動して処理を終える
+      // 非上がりスロットの上限に達している場合は通常は上がり牌へ移動するが
+      // "カン"（同種3枚に同じ牌を追加して4枚にする）を行う場合は例外とする
       if (
         selectedSlotIndex !== lastSlotIndex &&
         nonWinningCount >= nonWinningCap
       ) {
-        setSelectedSlotIndex(lastSlotIndex)
-        return
+        const currentSlot = slots[selectedSlotIndex]
+        const filledTiles = currentSlot.tiles.filter(
+          (t): t is Tile => t !== null
+        )
+        const canKanHere =
+          currentSlot.maxTiles === 3 &&
+          filledTiles.length === 3 &&
+          isSameTileKind(filledTiles[0], filledTiles[1]) &&
+          isSameTileKind(filledTiles[1], filledTiles[2])
+        // カン可能かつ追加しようとしている牌がその牌と同種ならカンを許可する
+        if (!canKanHere) {
+          setSelectedSlotIndex(lastSlotIndex)
+          return
+        }
       }
 
       setSlots((prev) => {

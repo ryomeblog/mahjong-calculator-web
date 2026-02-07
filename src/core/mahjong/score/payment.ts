@@ -18,7 +18,8 @@ export function calculatePayment(
   if (conditions.isDealer) {
     // 親の場合
     if (conditions.isTsumo) {
-      // 親のツモ: 子が2倍ずつ払う
+      // 親のツモ: 子が支払う額はルール表に合わせて切り上げ処理
+      // 各子の支払い = ceil(basePoints * 2 / 100) * 100
       const eachPayment = Math.ceil((basePoints * 2) / 100) * 100
       return { tsumoEach: eachPayment }
     } else {
@@ -29,7 +30,7 @@ export function calculatePayment(
   } else {
     // 子の場合
     if (conditions.isTsumo) {
-      // 子のツモ: 親が2倍、子が1倍
+      // 子のツモ: 親がceil(basePoints*2/100)*100、子がceil(basePoints/100)*100
       const dealerPayment = Math.ceil((basePoints * 2) / 100) * 100
       const nonDealerPayment = Math.ceil(basePoints / 100) * 100
       return {
