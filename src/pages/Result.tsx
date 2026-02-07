@@ -269,7 +269,7 @@ export function Result() {
   const fuCalculation = calculateFu(meldGroup, conditions)
   const scoreCalculation = calculateScore(fuCalculation, han, conditions)
 
-  // 合計点数と支払い内訳を計算
+  // 合計点数と支払い内訳を計算（本場＝honba を考慮）
   let totalScore = 0
   let dealerPayment = 0
   let nonDealerPayment = 0
@@ -277,19 +277,29 @@ export function Result() {
   if (isTsumo) {
     if (isDealer) {
       // 親がツモ：各子が同額を払う
-      const eachPayment = scoreCalculation.payment.tsumoEach || 0
+      let eachPayment = scoreCalculation.payment.tsumoEach || 0
+      // 本場加算: 各子は honba ごとに +100 を支払う
+      eachPayment += honba * 100
       totalScore = eachPayment * 3
       dealerPayment = 0 // 親は払わない
       nonDealerPayment = eachPayment
     } else {
       // 子がツモ：親と子で異なる額
-      dealerPayment = scoreCalculation.payment.tsumoDealer || 0
-      nonDealerPayment = scoreCalculation.payment.tsumoNonDealer || 0
+      let dp = scoreCalculation.payment.tsumoDealer || 0
+      let ndp = scoreCalculation.payment.tsumoNonDealer || 0
+      // 本場加算: 親・子ともに honba ごとに +100 を支払う
+      dp += honba * 100
+      ndp += honba * 100
+      dealerPayment = dp
+      nonDealerPayment = ndp
       totalScore = dealerPayment + nonDealerPayment * 2
     }
   } else {
     // ロン：ロン和了の点数
-    totalScore = scoreCalculation.payment.ron || 0
+    let ron = scoreCalculation.payment.ron || 0
+    // 本場加算: 放銃者は honba ごとに +300 を支払う
+    ron += honba * 300
+    totalScore = ron
   }
 
   // 役を小さい順にソート
@@ -308,7 +318,10 @@ export function Result() {
       {/* ヘッダー */}
       <header className="relative flex h-16 items-center bg-slate-800 px-5">
         <div
-          onClick={() => navigate('/', { state })}
+          onClick={() => {
+            // デバッグログ: Result から Home に戻る際の honba 情報
+            navigate('/', { state })
+          }}
           className="absolute top-4 left-5 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-slate-700 text-slate-300 hover:bg-slate-600"
         >
           <IoArrowBack size={18} />
@@ -542,7 +555,9 @@ export function Result() {
         <div className="flex gap-3">
           <button
             type="button"
-            onClick={() => navigate('/', { state })}
+            onClick={() => {
+              navigate('/', { state })
+            }}
             className="flex-1 rounded-xl bg-slate-700 py-3.5 text-sm text-slate-300 hover:bg-slate-600"
           >
             修正する

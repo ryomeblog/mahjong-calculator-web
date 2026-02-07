@@ -63,6 +63,7 @@ export function Home() {
     doraTiles,
     uraDoraTiles,
     honba,
+    setHonbaDirect,
     removeDoraTile,
     incrementHonba,
     decrementHonba,
@@ -127,11 +128,9 @@ export function Home() {
       if (restoredState.uraDoraTiles)
         setUraDora([...restoredState.uraDoraTiles])
 
-      // 本場数を復元（複数回クリックして復元）
+      // 本場数を復元（直接代入）
       const targetHonba = restoredState.honba || 0
-      for (let i = 0; i < targetHonba; i++) {
-        incrementHonba()
-      }
+      setHonbaDirect(targetHonba)
 
       // 風を復元
       setRoundWind(restoredState.roundWind)

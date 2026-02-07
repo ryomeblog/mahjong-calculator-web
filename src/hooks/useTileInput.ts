@@ -171,6 +171,8 @@ export function useTileInput() {
   }
 
   // 本場
+  // 直接代入可能なセッターをエクスポート（復元時に差分ループで複数回実行されても安全に代入できるように）
+  const setHonbaDirect = (value: number) => setHonba(() => Math.max(0, value))
   const incrementHonba = () => setHonba((prev) => prev + 1)
   const decrementHonba = () => setHonba((prev) => Math.max(0, prev - 1))
 
@@ -254,6 +256,7 @@ export function useTileInput() {
     doraTiles,
     uraDoraTiles,
     honba,
+    setHonbaDirect,
     addDoraTile,
     removeDoraTile,
     addUraDoraTile,
