@@ -81,7 +81,7 @@ export function TileSelectModal({
         if (
           initialSlots &&
           initialSlots.length === expectedLength &&
-          initialTiles.length === 14
+          initialTiles.length >= 14
         ) {
           const clonedSlots = initialSlots.map((slot) => ({
             ...slot,
@@ -94,21 +94,22 @@ export function TileSelectModal({
           // 手牌モード: スロットに変換
           const newSlots = createSlots(handType)
 
-          // 14枚の場合、最後の1枚は上がり牌スロットに
-          if (initialTiles.length === 14) {
+          // 14枚以上の場合、最後の1枚は上がり牌スロットに
+          if (initialTiles.length >= 14) {
+            const lastIdx = initialTiles.length - 1
             let tileIdx = 0
             // 最後のスロット以外に牌を配置
             for (let slotIdx = 0; slotIdx < newSlots.length - 1; slotIdx++) {
               for (
                 let i = 0;
-                i < newSlots[slotIdx].maxTiles && tileIdx < 13;
+                i < newSlots[slotIdx].maxTiles && tileIdx < lastIdx;
                 i++
               ) {
                 newSlots[slotIdx].tiles[i] = initialTiles[tileIdx++]
               }
             }
             // 最後の1枚を上がり牌スロットに
-            newSlots[newSlots.length - 1].tiles[0] = initialTiles[13]
+            newSlots[newSlots.length - 1].tiles[0] = initialTiles[lastIdx]
             setSelectedSlotIndex(newSlots.length - 1) // 上がり牌スロットを選択
           } else {
             // 14枚未満の場合は従来通り
@@ -175,21 +176,31 @@ export function TileSelectModal({
     setSelectedSlotIndex(slotIndex)
   }, [])
 
-  // 牌クリック（鳴き判定の切り替え）
+  // 3枚同じ牌かどうかをチェック（赤ドラ無視で比較）
+  const isSameTileKind = useCallback((a: Tile, b: Tile): boolean => {
+    if (a.type !== b.type) return false
+    if (a.type === 'man' || a.type === 'pin' || a.type === 'sou')
+      return a.number === b.number
+    if (a.type === 'wind') return a.wind === b.wind
+    if (a.type === 'dragon') return a.dragon === b.dragon
+    return false
+  }, [])
+
+  // 牌クリック（鳴きマークの切り替え）
   const handleTileClick = useCallback(
     (slotIndex: number, tileIndex: number) => {
       // 上がり牌スロット（最後のスロット）の場合は何もしない
       if (slotIndex === slots.length - 1) return
 
-      // 個別の牌を横倒しに切り替え
+      // 鳴きトグル（牌クリックで鳴きマークを切り替え）
       setSlots((prev) => {
-        const newSlots = prev.map((slot, idx) => {
+        const newSlots = prev.map((s, idx) => {
           if (idx !== slotIndex) {
-            return { ...slot, tiles: [...slot.tiles] }
+            return { ...s, tiles: [...s.tiles] }
           }
 
           const newSidewaysTiles: Set<number> = new Set(
-            slot.sidewaysTiles || new Set<number>()
+            s.sidewaysTiles || new Set<number>()
           )
           if (newSidewaysTiles.has(tileIndex)) {
             newSidewaysTiles.delete(tileIndex)
@@ -198,42 +209,45 @@ export function TileSelectModal({
           }
 
           return {
-            ...slot,
-            tiles: [...slot.tiles],
+            ...s,
+            tiles: [...s.tiles],
             sidewaysTiles: newSidewaysTiles,
           }
         })
         return newSlots
       })
     },
-    [slots]
+    [slots.length]
   )
 
   // スロットクリア
   const handleClearSlot = useCallback((slotIndex: number) => {
     setSlots((prev) => {
-      const newSlots = prev.map((slot, idx) =>
-        idx === slotIndex
-          ? {
-              ...slot,
-              tiles: slot.tiles.map(() => null),
-              sidewaysTiles: new Set<number>(),
-            }
-          : { ...slot, tiles: [...slot.tiles] }
+      const newSlots = prev.map((slot, idx) => {
+        if (idx !== slotIndex) return { ...slot, tiles: [...slot.tiles] }
+        // カン拡張されたスロットは3に戻す
+        const originalMaxTiles =
+          slot.maxTiles === 4 && slot.label.startsWith('面子')
+            ? 3
+            : slot.maxTiles
+        return {
+          ...slot,
+          tiles: Array(originalMaxTiles).fill(null),
+          maxTiles: originalMaxTiles,
+          sidewaysTiles: new Set<number>(),
+        }
+      })
+
+      // クリア後: 上がり牌以外の全スロットの充填状態を確認
+      const meldSlots = newSlots.slice(0, -1)
+      const allMeldsFilled = meldSlots.every((s) =>
+        s.tiles.every((t) => t !== null)
       )
 
-      // クリア後の合計枚数を計算
-      const totalTiles = newSlots.reduce(
-        (count, s) => count + s.tiles.filter((t) => t !== null).length,
-        0
-      )
-
-      // 13枚未満になったら最初の空きスロットを選択
-      if (totalTiles < 13) {
+      if (!allMeldsFilled) {
         const firstEmptySlot = newSlots.findIndex(
-          (s) =>
-            s.tiles.some((t) => t === null) &&
-            newSlots.indexOf(s) < newSlots.length - 1
+          (s, idx) =>
+            idx < newSlots.length - 1 && s.tiles.some((t) => t === null)
         )
         if (firstEmptySlot !== -1) {
           setSelectedSlotIndex(firstEmptySlot)
@@ -250,26 +264,75 @@ export function TileSelectModal({
     (tile: Tile) => {
       if (selectedSlotIndex === null) return
 
+      const lastSlotIndex = slots.length - 1
+      const nonWinningSlots = slots.slice(0, -1)
+      const nonWinningMaxSum = nonWinningSlots.reduce(
+        (sum, s) => sum + s.maxTiles,
+        0
+      )
+      const nonWinningCap = Math.max(0, nonWinningMaxSum - 1) // 非上がりスロットは常に1枚欠けている仕様
+      const nonWinningCount = nonWinningSlots.reduce(
+        (count, s) => count + s.tiles.filter((t) => t !== null).length,
+        0
+      )
+
+      // 非上がりスロットの上限に達している場合、上がり牌スロットへ移動して処理を終える
+      if (
+        selectedSlotIndex !== lastSlotIndex &&
+        nonWinningCount >= nonWinningCap
+      ) {
+        setSelectedSlotIndex(lastSlotIndex)
+        return
+      }
+
       setSlots((prev) => {
         const newSlots = prev.map((slot) => ({
           ...slot,
           tiles: [...slot.tiles],
         }))
 
-        // 空いている最初の位置に牌を追加
         const slot = newSlots[selectedSlotIndex]
         const emptyIndex = slot.tiles.findIndex((t) => t === null)
+
+        // カン自動拡張: スロットが満杯（3/3）で3枚同じ牌があり、同じ牌を追加しようとした場合
+        if (emptyIndex === -1 && slot.maxTiles === 3) {
+          const filledTiles = slot.tiles.filter((t): t is Tile => t !== null)
+          if (
+            filledTiles.length === 3 &&
+            isSameTileKind(filledTiles[0], filledTiles[1]) &&
+            isSameTileKind(filledTiles[1], filledTiles[2]) &&
+            isSameTileKind(filledTiles[0], tile)
+          ) {
+            // カン拡張: maxTiles を4に、4番目に牌を追加（鳴きマークなし＝暗槓）
+            slot.tiles.push(tile)
+            slot.maxTiles = 4
+
+            // 上がり牌スロット以外の牌数を再計算し、上限に達していたら上がり牌へ移動
+            const meldSlots = newSlots.slice(0, -1)
+            const nonWinCountAfterKan = meldSlots.reduce(
+              (count, s) => count + s.tiles.filter((t) => t !== null).length,
+              0
+            )
+            if (nonWinCountAfterKan >= nonWinningCap) {
+              setSelectedSlotIndex(newSlots.length - 1)
+            }
+            return newSlots
+          }
+        }
+
+        // 通常の牌追加
         if (emptyIndex !== -1) {
           slot.tiles[emptyIndex] = tile
 
-          // 合計枚数を計算
-          const totalTiles = newSlots.reduce(
+          // 上がり牌スロット以外の牌数を再計算
+          const meldSlots = newSlots.slice(0, -1)
+          const nonWinCountAfter = meldSlots.reduce(
             (count, s) => count + s.tiles.filter((t) => t !== null).length,
             0
           )
 
-          // 13枚以上になったら上がり牌スロットを選択
-          if (totalTiles >= 13) {
+          // 非上がりが上限に達していれば上がり牌スロットへ移動
+          if (nonWinCountAfter >= nonWinningCap) {
             setSelectedSlotIndex(newSlots.length - 1)
           } else {
             // スロットが満杯になったら次のスロットに移動
@@ -283,7 +346,7 @@ export function TileSelectModal({
         return newSlots
       })
     },
-    [selectedSlotIndex]
+    [selectedSlotIndex, isSameTileKind, slots]
   )
 
   // 牌選択（ドラモード）
@@ -337,6 +400,36 @@ export function TileSelectModal({
           0
         )
       : stagingTiles.length
+
+  // 動的な最大牌数（カン拡張を反映）
+  const effectiveMaxTiles = useMemo(() => {
+    if (!isHandMode) return maxTiles
+    const total = slots.reduce((sum, slot) => sum + slot.maxTiles, 0)
+    // kokushi はスロット合計が既に 14 なので上がり牌分を引かない
+    if (handType === 'kokushi') return total
+    // それ以外は最後のスロット（上がり牌）の maxTiles を引く
+    const lastSlotMax = slots[slots.length - 1]?.maxTiles ?? 0
+    return total - lastSlotMax
+  }, [isHandMode, slots, maxTiles, handType])
+
+  // カン拡張中のフィルタ牌（拡張前・拡張後の両方を検出）
+  const kanFilterTile = useMemo((): Tile | null => {
+    if (!isHandMode || selectedSlotIndex === null) return null
+    const slot = slots[selectedSlotIndex]
+    if (!slot) return null
+    const filledTiles = slot.tiles.filter((t): t is Tile => t !== null)
+    if (filledTiles.length !== 3) return null
+    if (
+      !isSameTileKind(filledTiles[0], filledTiles[1]) ||
+      !isSameTileKind(filledTiles[1], filledTiles[2])
+    )
+      return null
+    // 拡張前（maxTiles=3, 3枚同じ）または拡張後（maxTiles=4, 空き1つ）
+    if (slot.maxTiles === 3 || slot.maxTiles === 4) {
+      return filledTiles[0]
+    }
+    return null
+  }, [isHandMode, selectedSlotIndex, slots, isSameTileKind])
 
   // initialTilesを除外したグローバル牌を計算（編集時の二重カウント防止）
   const effectiveGlobalTiles = useMemo(() => {
@@ -404,7 +497,8 @@ export function TileSelectModal({
                   : isDoraMode
                     ? 'ドラ/裏ドラ'
                     : '選択中の牌'}
-                （{currentTileCount} / {maxTiles}枚）
+                （{currentTileCount} /{' '}
+                {isHandMode ? effectiveMaxTiles : maxTiles}枚）
               </p>
             </div>
 
@@ -476,7 +570,8 @@ export function TileSelectModal({
                   isHandMode || isDoraMode ? slotsUsedTiles : stagingTiles
                 }
                 onTileSelect={handleTileSelect}
-                maxTiles={maxTiles}
+                maxTiles={isHandMode ? effectiveMaxTiles : maxTiles}
+                filterTile={kanFilterTile}
               />
             )}
           </div>

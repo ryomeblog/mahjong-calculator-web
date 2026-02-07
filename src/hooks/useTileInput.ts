@@ -190,7 +190,7 @@ export function useTileInput() {
   const setHandTiles = (tiles: Tile[], slots?: MeldSlot[]) => {
     setSelectedTiles(tiles)
     setHandSlots(slots || null)
-    if (tiles.length === 14) {
+    if (tiles.length >= 14) {
       setWinningTile(tiles[tiles.length - 1])
     } else {
       setWinningTile(null)

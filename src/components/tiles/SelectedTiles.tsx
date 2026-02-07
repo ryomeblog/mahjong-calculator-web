@@ -37,35 +37,35 @@ export function SelectedTiles({
 
   // スロット情報がある場合はそれを使って表示
   const renderFromSlots = useMemo(() => {
-    if (!handSlots || tileCount !== 14) return null
-
-    // 鳴き牌があるかチェック
-    const hasSidewaysTiles = handSlots.some(
-      (slot) => slot.sidewaysTiles && slot.sidewaysTiles.size > 0
-    )
+    if (!handSlots || tileCount < 14) return null
 
     return (
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-wrap items-end gap-3">
         {handSlots.map((slot, slotIndex) => {
           const hasTiles = slot.tiles.some((t) => t !== null)
           if (!hasTiles) return null
 
-          const hasSlotSidewaysTiles =
-            slot.sidewaysTiles && slot.sidewaysTiles.size > 0
-
           return (
-            <div
-              key={slotIndex}
-              className={`flex items-center ${hasSidewaysTiles || hasSlotSidewaysTiles ? 'gap-1' : 'gap-0.5'}`}
-            >
+            <div key={slotIndex} className="flex items-end gap-0.5">
               {slot.tiles.map((tile, tileIndex) => {
                 if (!tile) return null
                 const isSideways = slot.sidewaysTiles?.has(tileIndex) || false
+                if (isSideways) {
+                  // 横倒し牌: レイアウト上で正しいサイズを確保
+                  return (
+                    <div
+                      key={tileIndex}
+                      className="relative inline-flex items-center justify-center"
+                      style={{ width: 56, height: 40 }}
+                    >
+                      <div className="rotate-90 transform">
+                        <Tile tile={tile} size="small" />
+                      </div>
+                    </div>
+                  )
+                }
                 return (
-                  <div
-                    key={tileIndex}
-                    className={isSideways ? 'rotate-90 transform' : ''}
-                  >
+                  <div key={tileIndex}>
                     <Tile tile={tile} size="small" />
                   </div>
                 )
@@ -78,6 +78,7 @@ export function SelectedTiles({
   }, [handSlots, tileCount])
 
   // 14枚の時は面子分解して面子ごとに表示する（useMemoで最適化）
+  // カンの場合(15枚以上)はrenderFromSlotsで表示されるためここは14枚のみ
   const renderByMelds = useMemo(() => {
     if (tileCount !== 14 || !winningTile) return null
 
@@ -214,14 +215,14 @@ export function SelectedTiles({
           <div className="w-full py-8 text-center text-xs text-slate-500">
             タップして手牌を追加
           </div>
-        ) : tileCount === 14 && winningTile ? (
+        ) : tileCount >= 14 && winningTile ? (
           renderFromSlots || renderByMelds
         ) : (
           renderTilesInGroups
         )}
       </div>
 
-      {winningTile && tileCount !== 14 && (
+      {winningTile && tileCount < 14 && (
         <div className="mt-4">
           <h4 className="mb-2 text-sm font-semibold text-slate-400">和了牌</h4>
           <Tile tile={winningTile} isWinning size="small" />

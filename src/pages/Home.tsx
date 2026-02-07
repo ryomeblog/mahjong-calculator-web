@@ -97,7 +97,7 @@ export function Home() {
         !restoredSlots &&
         restoredState.handGroups &&
         restoredState.winningTile &&
-        restoredState.tiles.length === 14
+        restoredState.tiles.length >= 14
       ) {
         const groups = restoredState.handGroups
         const handType =
@@ -108,6 +108,11 @@ export function Home() {
               : 'standard'
         const slots = createSlots(handType)
         for (let i = 0; i < Math.min(groups.length, slots.length - 1); i++) {
+          // カングループ（4枚）の場合はスロットを拡張
+          if (groups[i].length === 4 && slots[i].maxTiles === 3) {
+            slots[i].maxTiles = 4
+            slots[i].tiles = [null, null, null, null]
+          }
           for (let j = 0; j < groups[i].length && j < slots[i].maxTiles; j++) {
             slots[i].tiles[j] = groups[i][j]
           }
@@ -177,12 +182,13 @@ export function Home() {
   }
 
   // モーダル設定
+  // 手牌モーダルの isHandMode は maxTiles===14 で判定されるため、常に14を渡す
   const modalConfig = useMemo(() => {
     switch (modalTarget) {
       case 'hand':
         return {
           title: '手牌を選択',
-          maxTiles: 14,
+          maxTiles: 14 as number,
           initialTiles: selectedTiles,
         }
       case 'dora':
@@ -231,8 +237,8 @@ export function Home() {
 
   // 点数計算実行（useCallbackで最適化）
   const handleCalculate = useCallback(() => {
-    if (selectedTiles.length === 14 && winningTile) {
-      // handSlotsからグループ構造を取得（和了牌スロットを除いた13枚）
+    if (selectedTiles.length >= 14 && winningTile) {
+      // handSlotsからグループ構造を取得（和了牌スロットを除く）
       let handGroups: Tile[][] | undefined
       let openGroups: number[] | undefined
       if (handSlots && handSlots.length > 1) {
@@ -305,7 +311,7 @@ export function Home() {
     navigate,
   ])
 
-  const canCalculate = selectedTiles.length === 14 && winningTile !== null
+  const canCalculate = selectedTiles.length >= 14 && winningTile !== null
 
   return (
     <div className="min-h-screen bg-slate-950">
@@ -390,7 +396,13 @@ export function Home() {
 
       {/* 牌選択モーダル */}
       <TileSelectModal
-        isOpen={modalTarget !== null && modalTarget !== 'specialYaku'}
+        isOpen={
+          modalTarget !== null &&
+          modalTarget !== 'specialYaku' &&
+          modalTarget !== 'pon' &&
+          modalTarget !== 'chi' &&
+          modalTarget !== 'kan'
+        }
         title={modalConfig.title}
         maxTiles={modalConfig.maxTiles}
         initialTiles={modalConfig.initialTiles}

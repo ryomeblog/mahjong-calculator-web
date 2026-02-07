@@ -173,8 +173,8 @@ export function locationStateToSearchParams(
       state.handGroups.map((g) => tilesToCompactString(g)).join('-')
     )
   } else {
-    // handGroupsがない場合: 先頭13枚を使用
-    params.set('h', tilesToCompactString(state.tiles.slice(0, 13)))
+    // handGroupsがない場合: 和了牌以外の全牌を使用
+    params.set('h', tilesToCompactString(state.tiles.slice(0, -1)))
   }
 
   // w = 和了牌（1枚）
@@ -251,10 +251,10 @@ export function searchParamsToLocationState(
 
   const winningTiles = compactStringToTiles(w)
 
-  if (handTiles.length !== 13) {
+  if (handTiles.length < 13 || handTiles.length > 17) {
     return {
       ok: false,
-      error: `手牌(h)は13枚必要です（現在${handTiles.length}枚）`,
+      error: `手牌(h)は13〜17枚必要です（現在${handTiles.length}枚）`,
     }
   }
   if (winningTiles.length !== 1) {

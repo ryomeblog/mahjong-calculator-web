@@ -25,6 +25,8 @@ interface TileGridProps {
   readonly onTileSelect: (tile: Tile) => void
   /** このセッションで選択可能な最大枚数 */
   readonly maxTiles: number
+  /** フィルタ牌（設定時は同種牌のみ選択可能） */
+  readonly filterTile?: Tile | null
 }
 
 export function TileGrid({
@@ -32,6 +34,7 @@ export function TileGrid({
   stagingTiles,
   onTileSelect,
   maxTiles,
+  filterTile,
 }: TileGridProps) {
   const [activeTab, setActiveTab] = useState<TileTab>('man')
 
@@ -41,7 +44,17 @@ export function TileGrid({
     return globalCount + stagingCount
   }
 
+  const isSameTileKind = (a: Tile, b: Tile): boolean => {
+    if (a.type !== b.type) return false
+    if (a.type === 'man' || a.type === 'pin' || a.type === 'sou')
+      return a.number === b.number
+    if (a.type === 'wind') return a.wind === b.wind
+    if (a.type === 'dragon') return a.dragon === b.dragon
+    return false
+  }
+
   const canAddTile = (tile: Tile): boolean => {
+    if (filterTile && !isSameTileKind(tile, filterTile)) return false
     if (stagingTiles.length >= maxTiles) return false
     return getTileCount(tile) < 4
   }

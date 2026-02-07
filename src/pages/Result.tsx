@@ -17,6 +17,7 @@ import {
   decomposeStandard,
   detectSpecialForms,
   detectYaku,
+  detectWaitType,
   calculateHan,
   calculateFu,
   calculateScore,
@@ -25,6 +26,7 @@ import {
   type WinningConditions,
   type Meld,
   type MeldGroup,
+  type Pair,
   type SpecialForm,
 } from '@/core/mahjong'
 import {
@@ -187,15 +189,18 @@ export function Result() {
     redDoraCount,
   }
 
-  // 手牌枚数バリデーション
-  if (tiles.length !== 14) {
+  // 手牌枚数バリデーション（カン含む場合は14-18枚）
+  if (tiles.length < 14 || tiles.length > 18) {
     return (
       <ErrorScreen
-        message={`手牌は14枚である必要があります（現在${tiles.length}枚）`}
+        message={`手牌は14〜18枚である必要があります（現在${tiles.length}枚）`}
         navigate={navigate}
       />
     )
   }
+
+  // カンを含むかどうか（14枚以上）
+  const hasKan = tiles.length > 14
 
   // 鳴き面子の牌グループを取得
   const openMeldTiles = getOpenMeldTiles(
@@ -204,8 +209,8 @@ export function Result() {
     state.handGroups
   )
 
-  // 特殊形を先にチェック（七対子、国士無双）
-  const specialForms = detectSpecialForms(tiles, winningTile)
+  // 特殊形を先にチェック（七対子、国士無双）- カンの場合はスキップ
+  const specialForms = hasKan ? [] : detectSpecialForms(tiles, winningTile)
 
   // 特殊形がある場合はそれを使用、なければ標準形で分解
   let meldGroup: MeldGroup
@@ -217,6 +222,23 @@ export function Result() {
     specialForm = specialForms[0]
     // SpecialFormをMeldGroupに変換（ダミーの面子構成を作成）
     meldGroup = convertSpecialFormToMeldGroup(specialForm)
+    yakuList = detectYaku(meldGroup, conditions)
+  } else if (hasKan && state.handGroups) {
+    // カンを含む手牌: handGroupsから直接MeldGroupを構築
+    const builtGroup = buildMeldGroupFromGroups(
+      state.handGroups,
+      winningTile,
+      openMeldTiles
+    )
+    if (!builtGroup) {
+      return (
+        <ErrorScreen
+          message="カンを含む手牌の面子構成に失敗しました"
+          navigate={navigate}
+        />
+      )
+    }
+    meldGroup = builtGroup
     yakuList = detectYaku(meldGroup, conditions)
   } else {
     // 標準形の場合
@@ -625,6 +647,169 @@ function applyOpenMelds(
   }
 }
 
+// handGroupsからMeldGroupを構築（カンを含む手牌用）
+function buildMeldGroupFromGroups(
+  handGroups: readonly (readonly TileType[])[],
+  winningTile: TileType,
+  openMeldTiles: readonly (readonly TileType[])[]
+): MeldGroup | null {
+  const isSameTileLocal = (a: TileType, b: TileType): boolean => {
+    if (a.type !== b.type) return false
+    if (a.type === 'man' || a.type === 'pin' || a.type === 'sou')
+      return a.number === b.number
+    if (a.type === 'wind') return a.wind === b.wind
+    if (a.type === 'dragon') return a.dragon === b.dragon
+    return false
+  }
+
+  // openMeldTilesのキーマッチ用（消費可能なマップ）
+  const openKeys = new Map<string, number>()
+  for (const group of openMeldTiles) {
+    const key = meldTileKey(group)
+    openKeys.set(key, (openKeys.get(key) || 0) + 1)
+  }
+
+  const checkOpen = (
+    keys: Map<string, number>,
+    groupTiles: readonly TileType[]
+  ) => {
+    const key = meldTileKey(groupTiles)
+    const count = keys.get(key) || 0
+    if (count > 0) {
+      keys.set(key, count - 1)
+      return true
+    }
+    return false
+  }
+
+  // helper: can a pair be completed to a meld using winningTile (triplet or sequence)
+  const canCompletePairWithWinning = (p: readonly TileType[], w: TileType) => {
+    // triplet
+    if (p.some((t) => isSameTileLocal(t, w)))
+      return { ok: true, type: 'triplet' as const }
+
+    // sequence possibility: both tiles and winning must be number tiles of same suit
+    if (
+      (w.type === 'man' || w.type === 'pin' || w.type === 'sou') &&
+      p.every(
+        (t) =>
+          t.type === w.type &&
+          (t.type === 'man' || t.type === 'pin' || t.type === 'sou')
+      )
+    ) {
+      const nums = [p[0].number!, p[1].number!, w.number!].sort((a, b) => a - b)
+      if (nums[0] + 1 === nums[1] && nums[1] + 1 === nums[2])
+        return { ok: true, type: 'sequence' as const }
+    }
+
+    return { ok: false }
+  }
+
+  // categorize groups
+  const kongs: TileType[][] = []
+  const tripOrSeq: TileType[][] = []
+  const pairs: TileType[][] = []
+
+  for (const g of handGroups) {
+    if (g.length === 4) kongs.push(Array.from(g) as TileType[])
+    else if (g.length === 3) tripOrSeq.push(Array.from(g) as TileType[])
+    else if (g.length === 2) pairs.push(Array.from(g) as TileType[])
+    else return null
+  }
+
+  const baseMeldCount = kongs.length + tripOrSeq.length
+  const neededMelds = 4 - baseMeldCount
+
+  if (pairs.length !== neededMelds + 1) return null
+
+  // choose a pair index such that other pairs can be completed with winning tile
+  let chosenPairIndex = -1
+  for (let i = 0; i < pairs.length; i++) {
+    const others = pairs.filter((_, idx) => idx !== i)
+    const allPromotable = others.every(
+      (p) => canCompletePairWithWinning(p, winningTile).ok
+    )
+    if (allPromotable) {
+      chosenPairIndex = i
+      break
+    }
+  }
+
+  if (chosenPairIndex === -1) return null
+
+  // build final melds with open detection
+  const trialOpenKeys = new Map(openKeys)
+  const melds: Meld[] = []
+
+  // add original kongs and trip/seq
+  for (const g of handGroups) {
+    if (g.length === 4) {
+      const open = checkOpen(trialOpenKeys, g)
+      melds.push({
+        type: 'kong',
+        tiles: g as readonly [TileType, TileType, TileType, TileType],
+        isConcealed: !open,
+      })
+    } else if (g.length === 3) {
+      const open = checkOpen(trialOpenKeys, g)
+      const allSame = isSameTileLocal(g[0], g[1]) && isSameTileLocal(g[1], g[2])
+      melds.push({
+        type: allSame ? 'triplet' : 'sequence',
+        tiles: g as readonly [TileType, TileType, TileType],
+        isConcealed: !open,
+      })
+    }
+  }
+
+  // promote other pairs to melds using winningTile
+  for (let i = 0; i < pairs.length; i++) {
+    if (i === chosenPairIndex) continue
+    const p = pairs[i]
+    const result = canCompletePairWithWinning(p, winningTile)
+    if (!result.ok) return null
+
+    if (result.type === 'triplet') {
+      // construct triplet tuple
+      const trip: [TileType, TileType, TileType] = [
+        p[0],
+        p[1],
+        winningTile,
+      ] as [TileType, TileType, TileType]
+      const open = checkOpen(trialOpenKeys, trip)
+      melds.push({ type: 'triplet', tiles: trip, isConcealed: !open })
+    } else {
+      // sequence: construct sorted triple as tuple
+      const seqTiles = [p[0], p[1], winningTile].slice() as TileType[]
+      seqTiles.sort((a, b) => (a.number || 0) - (b.number || 0))
+      const seq: [TileType, TileType, TileType] = [
+        seqTiles[0],
+        seqTiles[1],
+        seqTiles[2],
+      ] as [TileType, TileType, TileType]
+      const open = checkOpen(trialOpenKeys, seq)
+      melds.push({ type: 'sequence', tiles: seq, isConcealed: !open })
+    }
+  }
+
+  const chosenPair = pairs[chosenPairIndex]
+  const pair: Pair = {
+    type: 'pair',
+    tiles: [chosenPair[0], chosenPair[1]] as readonly [TileType, TileType],
+    isConcealed: true,
+  }
+
+  if (melds.length !== 4) return null
+
+  const wait = detectWaitType(melds, pair, winningTile)
+  return {
+    melds: melds as [Meld, Meld, Meld, Meld],
+    pair,
+    wait,
+    winningTile,
+    isSpecial: false,
+  }
+}
+
 // エラー画面コンポーネント
 function ErrorScreen({
   message,
@@ -879,24 +1064,39 @@ function HandDisplay({
   // handSlotsがある場合はそれを使って表示（鳴き牌情報を含む）
   if (handSlots) {
     return (
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-wrap items-end gap-3">
         {handSlots.map((slot, slotIndex) => {
           const hasTiles = slot.tiles.some((t) => t !== null)
           if (!hasTiles) return null
 
           return (
-            <div key={slotIndex} className="flex items-center gap-0.5">
+            <div key={slotIndex} className="flex items-end gap-0.5">
               {slot.tiles.map((tile, tileIndex) => {
                 if (!tile) return null
                 const isSideways = slot.sidewaysTiles?.has(tileIndex) || false
                 const isWinningTileCheck =
                   slotIndex === handSlots.length - 1 && tileIndex === 0
                 const isDora = isDoraIndicator(tile)
+                if (isSideways) {
+                  return (
+                    <div
+                      key={tileIndex}
+                      className="relative inline-flex items-center justify-center"
+                      style={{ width: 56, height: 40 }}
+                    >
+                      <div className="rotate-90 transform">
+                        <Tile
+                          tile={tile}
+                          size="small"
+                          isWinning={isWinningTileCheck}
+                          isDora={isDora}
+                        />
+                      </div>
+                    </div>
+                  )
+                }
                 return (
-                  <div
-                    key={tileIndex}
-                    className={isSideways ? 'rotate-90 transform' : ''}
-                  >
+                  <div key={tileIndex}>
                     <Tile
                       tile={tile}
                       size="small"

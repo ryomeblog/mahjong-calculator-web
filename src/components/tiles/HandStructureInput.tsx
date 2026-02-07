@@ -32,19 +32,37 @@ export function HandStructureInput({
   selectedSlotIndex,
   winningTileSlot,
 }: HandStructureInputProps) {
-  // 13枚入力済みかどうかを判定
-  const totalTiles = slots.reduce(
-    (count, slot) => count + slot.tiles.filter((t) => t !== null).length,
-    0
+  // 上がり牌スロット以外が全て埋まっているかを判定
+  const meldSlots = slots.slice(0, -1)
+  const allMeldsFilled = meldSlots.every((s) =>
+    s.tiles.every((t) => t !== null)
   )
-  const is13TilesFilled = totalTiles >= 13
 
   return (
     <div className="flex flex-wrap gap-3">
       {slots.map((slot, slotIndex) => {
         const isSelected = selectedSlotIndex === slotIndex
         const isWinningTileSlot = slotIndex === slots.length - 1
-        const isDisabled = is13TilesFilled && !isWinningTileSlot
+        // カン拡張可能なスロット（maxTiles=3, 3枚同じ牌）は無効化しない
+        const isKanExpandable =
+          slot.maxTiles === 3 &&
+          slot.tiles.every((t) => t !== null) &&
+          slot.tiles.length === 3 &&
+          (() => {
+            const t = slot.tiles as Tile[]
+            return (
+              t[0].type === t[1].type &&
+              t[1].type === t[2].type &&
+              t[0].number === t[1].number &&
+              t[1].number === t[2].number &&
+              t[0].wind === t[1].wind &&
+              t[1].wind === t[2].wind &&
+              t[0].dragon === t[1].dragon &&
+              t[1].dragon === t[2].dragon
+            )
+          })()
+        const isDisabled =
+          allMeldsFilled && !isWinningTileSlot && !isKanExpandable
 
         return (
           <div
@@ -61,9 +79,15 @@ export function HandStructureInput({
             <div className="mb-2 flex items-center justify-between gap-2">
               <span className="text-xs font-semibold text-slate-400">
                 {slot.label}
-                {slot.sidewaysTiles && slot.sidewaysTiles.size > 0 && (
+                {slot.maxTiles === 4 &&
+                slot.sidewaysTiles &&
+                slot.sidewaysTiles.size > 0 ? (
+                  <span className="ml-1 text-orange-400">（鳴きカン）</span>
+                ) : slot.maxTiles === 4 ? (
+                  <span className="ml-1 text-purple-400">（カン）</span>
+                ) : slot.sidewaysTiles && slot.sidewaysTiles.size > 0 ? (
                   <span className="ml-1 text-orange-400">（鳴き）</span>
-                )}
+                ) : null}
               </span>
               <div
                 onClick={(e) => {
