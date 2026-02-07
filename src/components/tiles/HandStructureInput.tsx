@@ -2,6 +2,7 @@
  * 手牌構造入力コンポーネント（雀頭・面子枠での入力）
  */
 
+import { useEffect, useState } from 'react'
 import type { Tile } from '@/core/mahjong'
 import { TileSvg } from './TileSvg'
 import { IoAdd, IoTrash } from 'react-icons/io5'
@@ -38,18 +39,37 @@ export function HandStructureInput({
     s.tiles.every((t) => t !== null)
   )
 
+  const [isTablet, setIsTablet] = useState(false)
+
+  useEffect(() => {
+    const mql = window.matchMedia('(min-width: 641px) and (max-width: 1024px)')
+    const handler = () => setIsTablet(mql.matches)
+    handler()
+    mql.addEventListener('change', handler)
+    return () => mql.removeEventListener('change', handler)
+  }, [])
+
   return (
     <div className="flex flex-wrap gap-3">
       {slots.map((slot, slotIndex) => {
+        // タブレット時のみ、牌の個数に合わせて最小幅を調整
+        const baseMinWidth = 140
+        const tileCount = slot.maxTiles
+        // 牌幅(sm:w-12 = 48px) + 牌間 gap (gap-1 = 4px) + コンテナ padding (p-3 -> 12px each side = 24px)
+        // 推奨式: tileCount*52 + 20（バッファ）
+        const computedMinWidth = isTablet
+          ? Math.max(100, tileCount * 52 + 20)
+          : baseMinWidth
+
         const isSelected = selectedSlotIndex === slotIndex
         const isWinningTileSlot = slotIndex === slots.length - 1
         // カン拡張可能なスロット（maxTiles=3, 3枚同じ牌）は無効化しない
         const isKanExpandable =
           slot.maxTiles === 3 &&
-          slot.tiles.every((t) => t !== null) &&
-          slot.tiles.length === 3 &&
+          slot.tiles.every((t): t is Tile => t !== null) &&
           (() => {
             const t = slot.tiles as Tile[]
+            if (t.length < 3) return false
             return (
               t[0].type === t[1].type &&
               t[1].type === t[2].type &&
@@ -68,7 +88,8 @@ export function HandStructureInput({
           <div
             key={slotIndex}
             onClick={() => !isDisabled && onSlotClick(slotIndex)}
-            className={`min-w-[140px] flex-1 rounded-lg border-2 p-3 transition-all ${
+            style={{ minWidth: `${computedMinWidth}px` }}
+            className={`flex-1 rounded-lg border-2 p-3 transition-all ${
               isDisabled
                 ? 'cursor-not-allowed border-slate-800 bg-slate-950 opacity-50'
                 : isSelected
