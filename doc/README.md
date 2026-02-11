@@ -1,4 +1,4 @@
-# 麻雀点数計算アプリ - 設計書
+# まじゃっぴー - 設計書
 
 ## 概要
 
@@ -20,6 +20,7 @@
 アプリケーション全体のアーキテクチャを定義。
 
 **内容**:
+
 - 3層アーキテクチャの詳細
 - 各層の責務と構成
 - UI層・状態管理層・ロジック層の設計
@@ -30,6 +31,7 @@
 **対象読者**: すべての開発者
 
 **こんな時に読む**:
+
 - プロジェクトの全体像を把握したい
 - 各層の役割を理解したい
 - どこに何を実装すべきか迷った時
@@ -41,6 +43,7 @@
 プロジェクトのディレクトリ構造とファイル配置を定義。
 
 **内容**:
+
 - 完全なディレクトリツリー
 - 各ディレクトリの役割と責務
 - ファイル命名規則
@@ -51,6 +54,7 @@
 **対象読者**: すべての開発者
 
 **こんな時に読む**:
+
 - 新しいファイルを作成する時
 - どこにコードを配置すべきか迷った時
 - 既存コードを探す時
@@ -62,6 +66,7 @@
 データの流れと処理パイプラインを定義。
 
 **内容**:
+
 - 詳細なデータフロー図
 - 手牌入力フロー
 - 和了条件入力フロー
@@ -78,6 +83,7 @@
 **対象読者**: ロジック層を実装する開発者
 
 **こんな時に読む**:
+
 - ロジック層の実装を始める時
 - パイプライン処理を理解したい時
 - 各処理の入出力を確認したい時
@@ -89,6 +95,7 @@
 TypeScriptの型定義を網羅的に定義。
 
 **内容**:
+
 - 基本型定義（牌、面子、役、和了条件、結果）
 - ユーティリティ型
 - 定数型
@@ -100,6 +107,7 @@ TypeScriptの型定義を網羅的に定義。
 **対象読者**: すべての開発者
 
 **こんな時に読む**:
+
 - 新しい型を定義する時
 - 既存の型を確認したい時
 - 型エラーを解決したい時
@@ -155,6 +163,7 @@ TypeScriptの型定義を網羅的に定義。
 ```
 
 **利点**:
+
 - 関心の分離が明確
 - テストが容易
 - 再利用性が高い
@@ -173,6 +182,7 @@ src/features/
 ```
 
 **利点**:
+
 - 機能の追加・削除が容易
 - チーム開発で分担しやすい
 - 関連コードが近くにある
@@ -191,11 +201,12 @@ function calculateFu(meldGroup: MeldGroup): number {
 
 // ❌ 悪い例：副作用あり
 function calculateFu(meldGroup: MeldGroup): void {
-  setState(fu)  // 状態を変更
+  setState(fu) // 状態を変更
 }
 ```
 
 **利点**:
+
 - テストが簡単
 - バグが少ない
 - 並行処理が可能
@@ -214,6 +225,7 @@ type TileType = string
 ```
 
 **利点**:
+
 - コンパイル時にエラーを検出
 - IDEの補完が効く
 - リファクタリングが安全
@@ -227,6 +239,7 @@ type TileType = string
 **目標**: プロジェクトの基盤を整える
 
 **タスク**:
+
 - [x] Vite + React + TypeScript のセットアップ
 - [x] Tailwind CSS v5 のセットアップ
 - [x] ESLint + Prettier のセットアップ
@@ -244,6 +257,7 @@ type TileType = string
 **タスク**:
 
 #### 2.1 基本型定義
+
 - [ ] `types/tile.ts` - 牌の型定義
 - [ ] `types/meld.ts` - 面子の型定義
 - [ ] `types/yaku.ts` - 役の型定義
@@ -251,17 +265,20 @@ type TileType = string
 - [ ] `types/result.ts` - 計算結果の型定義
 
 #### 2.2 パーサー
+
 - [ ] `parser/parser.ts` - 牌の解析
 - [ ] `parser/validator.ts` - バリデーション
 - [ ] テストコード
 
 #### 2.3 面子分解
+
 - [ ] `decomposer/standard.ts` - 標準形の分解
 - [ ] `decomposer/special.ts` - 特殊形の判定
 - [ ] `decomposer/recursive.ts` - 再帰的分解
 - [ ] テストコード（最重要）
 
 #### 2.4 役判定
+
 - [ ] `yaku/detector.ts` - 役判定メイン
 - [ ] `yaku/one-han/` - 1翻役（10種類程度）
 - [ ] `yaku/two-han/` - 2翻役（10種類程度）
@@ -269,6 +286,7 @@ type TileType = string
 - [ ] テストコード
 
 #### 2.5 符・翻・点数計算
+
 - [ ] `fu/calculator.ts` - 符計算
 - [ ] `score/calculator.ts` - 点数計算
 - [ ] テストコード
@@ -276,6 +294,7 @@ type TileType = string
 **期間**: 1-2週間
 
 **優先順位**:
+
 1. パーサー（他の実装の基盤）
 2. 面子分解（最も複雑）
 3. 役判定（最も時間がかかる）
@@ -288,6 +307,7 @@ type TileType = string
 **目標**: React Hooks でアプリケーション状態を管理
 
 **タスク**:
+
 - [ ] `hooks/useHandInput.ts` - 手牌入力
 - [ ] `hooks/useWinningConditions.ts` - 和了条件
 - [ ] `hooks/useCalculation.ts` - 計算実行
@@ -304,11 +324,13 @@ type TileType = string
 **タスク**:
 
 #### 4.1 共通UIコンポーネント
+
 - [ ] `components/ui/Button.tsx`
 - [ ] `components/ui/Card.tsx`
 - [ ] `components/ui/Checkbox.tsx`
 
 #### 4.2 機能コンポーネント
+
 - [ ] `features/hand-input/` - 手牌入力UI
 - [ ] `features/conditions/` - 和了条件入力UI
 - [ ] `features/calculation/` - 計算結果表示UI
@@ -323,6 +345,7 @@ type TileType = string
 **目標**: 全体の統合とテスト
 
 **タスク**:
+
 - [ ] 統合テスト
 - [ ] E2Eテスト
 - [ ] パフォーマンス最適化
@@ -395,7 +418,7 @@ type TileType = string
 ```typescript
 interface WinningConditions {
   // ... 既存のフィールド
-  redDoraCount: number  // 赤ドラ枚数を追加
+  redDoraCount: number // 赤ドラ枚数を追加
 }
 ```
 
@@ -418,10 +441,12 @@ interface WinningConditions {
 ## 参考資料
 
 ### 麻雀ルール
+
 - 日本プロ麻雀連盟ルール
 - 天鳳ルール（オンライン麻雀）
 
 ### 技術資料
+
 - [React 公式ドキュメント](https://react.dev/)
 - [TypeScript 公式ドキュメント](https://www.typescriptlang.org/)
 - [Tailwind CSS 公式ドキュメント](https://tailwindcss.com/)

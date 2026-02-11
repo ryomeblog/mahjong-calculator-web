@@ -1,4 +1,4 @@
-# 麻雀点数計算アプリ - アーキテクチャ設計書
+# まじゃっぴー - アーキテクチャ設計書
 
 ## 概要
 
@@ -31,6 +31,7 @@
 ## 1. UI層 (View Layer)
 
 ### 責務
+
 - ユーザーインターフェースの描画
 - ユーザー入力の受付
 - 計算結果の表示
@@ -56,6 +57,7 @@ App
 #### 1.2 主要コンポーネント
 
 ##### TileInputPanel
+
 - **役割**: 手牌と和了牌の入力を管理
 - **Props**:
   - `onHandChange: (tiles: Tile[]) => void`
@@ -64,6 +66,7 @@ App
 - **状態**: なし（制御されたコンポーネント）
 
 ##### CalculationResult
+
 - **役割**: 計算結果の表示
 - **Props**:
   - `result: CalculationResult | null`
@@ -71,6 +74,7 @@ App
 - **状態**: なし
 
 ##### TileSelector
+
 - **役割**: 個々の牌を選択するUI
 - **Props**:
   - `onSelect: (tile: Tile) => void`
@@ -82,6 +86,7 @@ App
 ## 2. 状態管理層 (State Layer)
 
 ### 責務
+
 - アプリケーション全体の状態管理
 - UI層とロジック層の橋渡し
 - 状態の更新とバリデーション
@@ -94,8 +99,8 @@ App
 // アプリケーション状態
 interface AppState {
   // 入力状態
-  hand: Tile[]              // 手牌（14枚）
-  winningTile: Tile | null  // 和了牌
+  hand: Tile[] // 手牌（14枚）
+  winningTile: Tile | null // 和了牌
   conditions: WinningConditions // 和了条件
 
   // 計算結果
@@ -108,27 +113,27 @@ interface AppState {
 
 // 和了条件
 interface WinningConditions {
-  isTsumo: boolean        // ツモ和了
-  isRiichi: boolean       // リーチ
+  isTsumo: boolean // ツモ和了
+  isRiichi: boolean // リーチ
   isDoubleRiichi: boolean // ダブルリーチ
-  isIppatsu: boolean      // 一発
-  isHaitei: boolean       // 海底
-  isHoutei: boolean       // 河底
-  isRinshan: boolean      // 嶺上
-  isChankan: boolean      // 槍槓
-  prevailingWind: Wind    // 場風
-  seatWind: Wind          // 自風
-  doraCount: number       // ドラ枚数
-  uraDoraCount: number    // 裏ドラ枚数
+  isIppatsu: boolean // 一発
+  isHaitei: boolean // 海底
+  isHoutei: boolean // 河底
+  isRinshan: boolean // 嶺上
+  isChankan: boolean // 槍槓
+  prevailingWind: Wind // 場風
+  seatWind: Wind // 自風
+  doraCount: number // ドラ枚数
+  uraDoraCount: number // 裏ドラ枚数
 }
 
 // 計算結果
 interface CalculationResult {
-  yaku: YakuItem[]        // 役リスト
-  fu: number              // 符
-  han: number             // 翻
-  basePoints: number      // 基本点
-  payment: Payment        // 支払い点数
+  yaku: YakuItem[] // 役リスト
+  fu: number // 符
+  han: number // 翻
+  basePoints: number // 基本点
+  payment: Payment // 支払い点数
   meldGroups: MeldGroup[] // 面子分解結果
 }
 ```
@@ -136,6 +141,7 @@ interface CalculationResult {
 #### 2.2 カスタムフック
 
 ##### useHandInput
+
 ```typescript
 /**
  * 手牌入力を管理するフック
@@ -154,6 +160,7 @@ function useHandInput() {
 ```
 
 ##### useCalculation
+
 ```typescript
 /**
  * 点数計算を実行するフック
@@ -192,6 +199,7 @@ function useCalculation() {
 ```
 
 ##### useWinningConditions
+
 ```typescript
 /**
  * 和了条件を管理するフック
@@ -215,6 +223,7 @@ function useWinningConditions() {
 ## 3. ロジック層 (Logic Layer)
 
 ### 責務
+
 - 麻雀のルールロジックの実装
 - すべて純粋関数として実装
 - 副作用なし、テスト容易性が高い
@@ -255,6 +264,7 @@ function calculateMahjongScore(
 #### 3.2 主要モジュール
 
 ##### parser.ts - 牌解析
+
 ```typescript
 /**
  * 牌の配列を解析し、正規化する
@@ -278,6 +288,7 @@ export function validateHand(tiles: Tile[]): boolean {
 ```
 
 ##### meld-decomposer.ts - 面子分解
+
 ```typescript
 /**
  * 手牌を面子と雀頭に分解する
@@ -299,6 +310,7 @@ export function detectSpecialForms(tiles: Tile[]): SpecialForm | null {
 ```
 
 ##### yaku-detector.ts - 役判定
+
 ```typescript
 /**
  * 面子分解結果から役を判定
@@ -326,6 +338,7 @@ export function isHonitsu(meldGroup: MeldGroup): boolean { ... }
 ```
 
 ##### fu-calculator.ts - 符計算
+
 ```typescript
 /**
  * 符を計算
@@ -354,6 +367,7 @@ export function calculateFu(
 ```
 
 ##### score-calculator.ts - 点数計算
+
 ```typescript
 /**
  * 符と翻から点数を計算
@@ -482,7 +496,9 @@ const TileDisplay = memo(({ tile }: Props) => { ... })
 ```typescript
 describe('decomposeMelds', () => {
   it('should decompose a simple hand', () => {
-    const tiles = [/* ... */]
+    const tiles = [
+      /* ... */
+    ]
     const result = decomposeMelds(tiles)
     expect(result).toHaveLength(1)
   })

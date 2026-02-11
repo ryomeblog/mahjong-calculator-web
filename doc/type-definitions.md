@@ -1,4 +1,4 @@
-# 麻雀点数計算アプリ - 型定義設計書
+# まじゃっぴー - 型定義設計書
 
 ## 型定義の設計方針
 
@@ -136,7 +136,7 @@ export interface Meld {
 export interface Sequence extends Meld {
   readonly type: 'sequence'
   readonly tiles: readonly [Tile, Tile, Tile]
-  readonly isConcealed: true  // 順子は常に暗
+  readonly isConcealed: true // 順子は常に暗
 }
 
 /**
@@ -166,19 +166,19 @@ export interface Kong extends Meld {
 export interface Pair extends Meld {
   readonly type: 'pair'
   readonly tiles: readonly [Tile, Tile]
-  readonly isConcealed: true  // 雀頭は常に暗
+  readonly isConcealed: true // 雀頭は常に暗
 }
 
 /**
  * 待ちの形
  */
 export type WaitType =
-  | 'ryanmen'    // 両面待ち（23 → 14）
-  | 'kanchan'    // 嵌張待ち（13 → 2）
-  | 'penchan'    // 辺張待ち（12 → 3 or 89 → 7）
-  | 'shanpon'    // 双碰待ち（11 + 22 → 1 or 2）
-  | 'tanki'      // 単騎待ち（1 → 1）
-  | 'multiple'   // 多面待ち
+  | 'ryanmen' // 両面待ち（23 → 14）
+  | 'kanchan' // 嵌張待ち（13 → 2）
+  | 'penchan' // 辺張待ち（12 → 3 or 89 → 7）
+  | 'shanpon' // 双碰待ち（11 + 22 → 1 or 2）
+  | 'tanki' // 単騎待ち（1 → 1）
+  | 'multiple' // 多面待ち
 
 /**
  * 面子構成（4面子1雀頭）
@@ -204,8 +204,8 @@ export interface MeldGroup {
  * 特殊形の種類
  */
 export type SpecialFormType =
-  | 'kokushi'      // 国士無双
-  | 'chiitoitsu'   // 七対子
+  | 'kokushi' // 国士無双
+  | 'chiitoitsu' // 七対子
 
 /**
  * 特殊形
@@ -227,56 +227,56 @@ export interface SpecialForm {
  */
 export type YakuName =
   // 1翻役
-  | 'riichi'           // 立直
-  | 'ippatsu'          // 一発
-  | 'tsumo'            // 門前清自摸和
-  | 'tanyao'           // 断么九
-  | 'pinfu'            // 平和
-  | 'iipeikou'         // 一盃口
-  | 'yakuhai-wind'     // 役牌（風牌）
-  | 'yakuhai-dragon'   // 役牌（三元牌）
-  | 'haitei'           // 海底撈月
-  | 'houtei'           // 河底撈魚
-  | 'rinshan'          // 嶺上開花
-  | 'chankan'          // 槍槓
+  | 'riichi' // 立直
+  | 'ippatsu' // 一発
+  | 'tsumo' // 門前清自摸和
+  | 'tanyao' // 断么九
+  | 'pinfu' // 平和
+  | 'iipeikou' // 一盃口
+  | 'yakuhai-wind' // 役牌（風牌）
+  | 'yakuhai-dragon' // 役牌（三元牌）
+  | 'haitei' // 海底撈月
+  | 'houtei' // 河底撈魚
+  | 'rinshan' // 嶺上開花
+  | 'chankan' // 槍槓
 
   // 2翻役
-  | 'double-riichi'    // 両立直
-  | 'chiitoitsu'       // 七対子
-  | 'chanta'           // 混全帯么九
-  | 'ikkitsuukan'      // 一気通貫
-  | 'sanshoku-doujun'  // 三色同順
-  | 'sanshoku-doukou'  // 三色同刻
-  | 'sankantsu'        // 三槓子
-  | 'toitoi'           // 対々和
-  | 'sanankou'         // 三暗刻
-  | 'shousangen'       // 小三元
-  | 'honroutou'        // 混老頭
+  | 'double-riichi' // 両立直
+  | 'chiitoitsu' // 七対子
+  | 'chanta' // 混全帯么九
+  | 'ikkitsuukan' // 一気通貫
+  | 'sanshoku-doujun' // 三色同順
+  | 'sanshoku-doukou' // 三色同刻
+  | 'sankantsu' // 三槓子
+  | 'toitoi' // 対々和
+  | 'sanankou' // 三暗刻
+  | 'shousangen' // 小三元
+  | 'honroutou' // 混老頭
 
   // 3翻役
-  | 'ryanpeikou'       // 二盃口
-  | 'junchan'          // 純全帯么九
-  | 'honitsu'          // 混一色
+  | 'ryanpeikou' // 二盃口
+  | 'junchan' // 純全帯么九
+  | 'honitsu' // 混一色
 
   // 6翻役
-  | 'chinitsu'         // 清一色
+  | 'chinitsu' // 清一色
 
   // 役満
-  | 'kokushi'          // 国士無双
-  | 'kokushi-13'       // 国士無双十三面待ち
-  | 'suuankou'         // 四暗刻
-  | 'suuankou-tanki'   // 四暗刻単騎
-  | 'daisangen'        // 大三元
-  | 'shousuushii'      // 小四喜
-  | 'daisuushii'       // 大四喜
-  | 'tsuuiisou'        // 字一色
-  | 'chinroutou'       // 清老頭
-  | 'ryuuiisou'        // 緑一色
-  | 'chuuren'          // 九蓮宝燈
-  | 'chuuren-9'        // 純正九蓮宝燈
-  | 'suukantsu'        // 四槓子
-  | 'tenhou'           // 天和
-  | 'chiihou'          // 地和
+  | 'kokushi' // 国士無双
+  | 'kokushi-13' // 国士無双十三面待ち
+  | 'suuankou' // 四暗刻
+  | 'suuankou-tanki' // 四暗刻単騎
+  | 'daisangen' // 大三元
+  | 'shousuushii' // 小四喜
+  | 'daisuushii' // 大四喜
+  | 'tsuuiisou' // 字一色
+  | 'chinroutou' // 清老頭
+  | 'ryuuiisou' // 緑一色
+  | 'chuuren' // 九蓮宝燈
+  | 'chuuren-9' // 純正九蓮宝燈
+  | 'suukantsu' // 四槓子
+  | 'tenhou' // 天和
+  | 'chiihou' // 地和
 
 /**
  * 役のアイテム
@@ -302,11 +302,11 @@ export interface YakuItem {
  * 役のカテゴリー
  */
 export type YakuCategory =
-  | 'situational'  // 状況役（リーチ、ツモなど）
-  | 'hand'         // 手役（タンヤオ、ピンフなど）
-  | 'color'        // 色役（ホンイツ、チンイツ）
-  | 'terminal'     // 么九役（チャンタ、ジュンチャンなど）
-  | 'yakuman'      // 役満
+  | 'situational' // 状況役（リーチ、ツモなど）
+  | 'hand' // 手役（タンヤオ、ピンフなど）
+  | 'color' // 色役（ホンイツ、チンイツ）
+  | 'terminal' // 么九役（チャンタ、ジュンチャンなど）
+  | 'yakuman' // 役満
 
 /**
  * 役の定義
@@ -497,13 +497,13 @@ export interface Payment {
  * 満貫以上の名前
  */
 export type LimitHandName =
-  | 'mangan'      // 満貫
-  | 'haneman'     // 跳満
-  | 'baiman'      // 倍満
-  | 'sanbaiman'   // 三倍満
-  | 'yakuman'     // 役満
-  | 'double-yakuman'  // ダブル役満
-  | 'triple-yakuman'  // トリプル役満
+  | 'mangan' // 満貫
+  | 'haneman' // 跳満
+  | 'baiman' // 倍満
+  | 'sanbaiman' // 三倍満
+  | 'yakuman' // 役満
+  | 'double-yakuman' // ダブル役満
+  | 'triple-yakuman' // トリプル役満
 
 /**
  * 点数計算結果
@@ -645,7 +645,7 @@ export const YAKU_DEFINITIONS: Record<YakuName, YakuDefinition> = {
     name: 'riichi',
     displayName: '立直',
     han: 1,
-    openHan: null,  // 鳴けない
+    openHan: null, // 鳴けない
     category: 'situational',
     isYakuman: false,
     description: '門前で立直を宣言し和了する',
@@ -672,7 +672,13 @@ export const LIMIT_HAND_TABLE = {
 ### component-props.ts - コンポーネントのProps型
 
 ```typescript
-import type { Tile, MeldGroup, YakuItem, CalculationResult, WinningConditions } from '@/core/mahjong/types'
+import type {
+  Tile,
+  MeldGroup,
+  YakuItem,
+  CalculationResult,
+  WinningConditions,
+} from '@/core/mahjong/types'
 
 /**
  * 牌ボタンのProps
@@ -755,7 +761,11 @@ export interface MeldGroupDisplayProps {
 ### hook-types.ts - フック用の型定義
 
 ```typescript
-import type { Tile, WinningConditions, CalculationResult } from '@/core/mahjong/types'
+import type {
+  Tile,
+  WinningConditions,
+  CalculationResult,
+} from '@/core/mahjong/types'
 
 /**
  * useHandInput の返り値
@@ -814,7 +824,7 @@ import type {
   Sequence,
   Triplet,
   Kong,
-  Pair
+  Pair,
 } from './types'
 
 /**
@@ -894,10 +904,10 @@ export function isPair(meld: Meld): meld is Pair {
  * 牌のJSON表現
  */
 export interface TileJson {
-  t: string   // type
-  n?: number  // number
-  w?: string  // wind
-  d?: string  // dragon
+  t: string // type
+  n?: number // number
+  w?: string // wind
+  d?: string // dragon
   r?: boolean // isRed
 }
 

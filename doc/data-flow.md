@@ -1,4 +1,4 @@
-# 麻雀点数計算アプリ - データフロー設計書
+# まじゃっぴー - データフロー設計書
 
 ## データフロー概要
 
@@ -77,6 +77,7 @@ UI Update (結果表示)
 ```
 
 **データ型**:
+
 ```typescript
 // 入力
 onClick: (tile: Tile) => void
@@ -132,6 +133,7 @@ validateHand(hand: Tile[]): boolean
 ```
 
 **データ型**:
+
 ```typescript
 interface WinningConditions {
   isTsumo: boolean
@@ -283,12 +285,14 @@ interface WinningConditions {
 ### Stage 1: parseTiles (牌解析)
 
 **入力**:
+
 ```typescript
 hand: Tile[]            // 13枚の手牌
 winningTile: Tile       // 和了牌
 ```
 
 **処理**:
+
 1. 手牌 + 和了牌を結合 (14枚)
 2. ソート (萬子 → 筒子 → 索子 → 字牌)
 3. バリデーション
@@ -296,6 +300,7 @@ winningTile: Tile       // 和了牌
    - 牌の種類が正しい
 
 **出力**:
+
 ```typescript
 ParsedHand {
   tiles: Tile[],        // ソート済み14枚
@@ -305,6 +310,7 @@ ParsedHand {
 ```
 
 **エラー**:
+
 - `InvalidHandError`: 手牌が不正
 
 ---
@@ -312,11 +318,13 @@ ParsedHand {
 ### Stage 2: decomposeMelds (面子分解)
 
 **入力**:
+
 ```typescript
 parsedHand: ParsedHand
 ```
 
 **処理**:
+
 1. 特殊形判定（国士無双、七対子）
 2. 標準形の再帰的分解
    - 順子を探す
@@ -325,6 +333,7 @@ parsedHand: ParsedHand
 3. すべての分解パターンを生成
 
 **アルゴリズム**:
+
 ```typescript
 function decompose(tiles: Tile[], melds: Meld[]): MeldGroup[] {
   // ベースケース: すべての牌を使い切った
@@ -346,19 +355,17 @@ function decompose(tiles: Tile[], melds: Meld[]): MeldGroup[] {
   // 順子を試す
   const sequence = findSequence(tiles)
   if (sequence) {
-    results.push(...decompose(
-      removeSequence(tiles, sequence),
-      [...melds, sequence]
-    ))
+    results.push(
+      ...decompose(removeSequence(tiles, sequence), [...melds, sequence])
+    )
   }
 
   // 刻子を試す
   const triplet = findTriplet(tiles)
   if (triplet) {
-    results.push(...decompose(
-      removeTriplet(tiles, triplet),
-      [...melds, triplet]
-    ))
+    results.push(
+      ...decompose(removeTriplet(tiles, triplet), [...melds, triplet])
+    )
   }
 
   return results
@@ -366,6 +373,7 @@ function decompose(tiles: Tile[], melds: Meld[]): MeldGroup[] {
 ```
 
 **出力**:
+
 ```typescript
 MeldGroup[] {
   melds: Meld[],        // 4面子
@@ -380,6 +388,7 @@ MeldGroup[] {
 ### Stage 3: detectYaku (役判定)
 
 **入力**:
+
 ```typescript
 meldGroup: MeldGroup
 conditions: WinningConditions
@@ -401,15 +410,18 @@ if (isPinfu(meldGroup)) yaku.push({ name: 'pinfu', han: 1 })
 if (isIkkitsuukan(meldGroup)) yaku.push({ name: 'ikkitsuukan', han: 2 })
 
 // 役満
-if (isKokushi(meldGroup)) yaku.push({ name: 'kokushi', han: 13, isYakuman: true })
+if (isKokushi(meldGroup))
+  yaku.push({ name: 'kokushi', han: 13, isYakuman: true })
 ```
 
 **役の優先順位**:
+
 1. 役満 (天和、地和など)
 2. 高翻役
 3. 低翻役
 
 **出力**:
+
 ```typescript
 YakuItem[] {
   name: string,         // 役の名前
@@ -423,24 +435,26 @@ YakuItem[] {
 ### Stage 4: calculateFu (符計算)
 
 **入力**:
+
 ```typescript
 meldGroup: MeldGroup
 conditions: WinningConditions
 ```
 
 **処理**:
+
 ```typescript
-let fu = 20  // 副底
+let fu = 20 // 副底
 
 // 面子の符
 for (const meld of meldGroup.melds) {
   if (meld.type === 'triplet') {
-    fu += meld.isTerminal ? 8 : 4  // 么九刻子 or 中張刻子
-    if (meld.isConcealed) fu *= 2  // 暗刻
+    fu += meld.isTerminal ? 8 : 4 // 么九刻子 or 中張刻子
+    if (meld.isConcealed) fu *= 2 // 暗刻
   }
   if (meld.type === 'kong') {
     fu += meld.isTerminal ? 32 : 16
-    if (meld.isConcealed) fu *= 2  // 暗槓
+    if (meld.isConcealed) fu *= 2 // 暗槓
   }
 }
 
@@ -450,9 +464,9 @@ if (isYakuhaiPair(meldGroup.pair, conditions)) {
 }
 
 // 待ちの符
-if (isEdgeWait(meldGroup.wait)) fu += 2      // 辺張待ち
-if (isClosedWait(meldGroup.wait)) fu += 2    // 嵌張待ち
-if (isPairWait(meldGroup.wait)) fu += 2      // 単騎待ち
+if (isEdgeWait(meldGroup.wait)) fu += 2 // 辺張待ち
+if (isClosedWait(meldGroup.wait)) fu += 2 // 嵌張待ち
+if (isPairWait(meldGroup.wait)) fu += 2 // 単騎待ち
 
 // 和了方法の符
 if (conditions.isTsumo) fu += 2
@@ -467,6 +481,7 @@ return Math.ceil(fu / 10) * 10
 ```
 
 **出力**:
+
 ```typescript
 FuCalculation {
   total: number,        // 合計符（切り上げ後）
@@ -485,12 +500,14 @@ FuCalculation {
 ### Stage 5: calculateHan (翻計算)
 
 **入力**:
+
 ```typescript
 yaku: YakuItem[]
 conditions: WinningConditions
 ```
 
 **処理**:
+
 ```typescript
 // 役の翻数を合計
 const yakuHan = yaku.reduce((sum, y) => sum + y.han, 0)
@@ -504,11 +521,12 @@ const totalHan = yakuHan + doraHan
 return {
   total: totalHan,
   yaku: yakuHan,
-  dora: doraHan
+  dora: doraHan,
 }
 ```
 
 **出力**:
+
 ```typescript
 HanCalculation {
   total: number,        // 合計翻
@@ -522,6 +540,7 @@ HanCalculation {
 ### Stage 6: calculateScore (点数計算)
 
 **入力**:
+
 ```typescript
 fu: number
 han: number
@@ -529,6 +548,7 @@ conditions: WinningConditions
 ```
 
 **処理**:
+
 ```typescript
 // 役満の場合
 if (han >= 13) {
@@ -548,11 +568,11 @@ const basePoints = fu * Math.pow(2, han + 2)
 if (conditions.isDealer) {
   if (conditions.isTsumo) {
     // 親のツモ: 子が2倍ずつ払う
-    const eachPayment = Math.ceil(basePoints * 2 / 100) * 100
+    const eachPayment = Math.ceil((basePoints * 2) / 100) * 100
     return { payment: { tsumoEach: eachPayment } }
   } else {
     // 親のロン: 放銃者が6倍払う
-    const ronPayment = Math.ceil(basePoints * 6 / 100) * 100
+    const ronPayment = Math.ceil((basePoints * 6) / 100) * 100
     return { payment: { ron: ronPayment } }
   }
 }
@@ -560,12 +580,14 @@ if (conditions.isDealer) {
 // 子の場合
 if (conditions.isTsumo) {
   // 子のツモ
-  const dealerPayment = Math.ceil(basePoints * 2 / 100) * 100
+  const dealerPayment = Math.ceil((basePoints * 2) / 100) * 100
   const nonDealerPayment = Math.ceil(basePoints / 100) * 100
-  return { payment: { tsumoDealer: dealerPayment, tsumoNonDealer: nonDealerPayment } }
+  return {
+    payment: { tsumoDealer: dealerPayment, tsumoNonDealer: nonDealerPayment },
+  }
 } else {
   // 子のロン
-  const ronPayment = Math.ceil(basePoints * 4 / 100) * 100
+  const ronPayment = Math.ceil((basePoints * 4) / 100) * 100
   return { payment: { ron: ronPayment } }
 }
 ```
@@ -580,6 +602,7 @@ if (conditions.isTsumo) {
 | 13翻+ | 役満 | 48000 | 32000 |
 
 **出力**:
+
 ```typescript
 ScoreCalculation {
   basePoints: number,       // 基本点
@@ -615,6 +638,7 @@ Core Logic
 ```
 
 **エラーの種類**:
+
 1. **InvalidHandError**: 手牌が不正（枚数、同一牌など）
 2. **NoValidMeldError**: 面子分解できない
 3. **NoYakuError**: 役がない
@@ -637,6 +661,7 @@ useEffect(() => {
 ```
 
 **保存データ**:
+
 - 最後の手牌
 - 最後の計算結果
 - 計算履歴（オプション）
