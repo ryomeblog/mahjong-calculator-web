@@ -29,8 +29,7 @@ export function getLimitHand(han: number, fu: number): LimitHandName | null {
   // 満貫
   if (han >= 5) return 'mangan'
   if (han === 4 && fu >= 40) return 'mangan'
-  // ルール表に合わせ、3翻は60符以上で満貫扱い
-  if (han === 3 && fu >= 60) return 'mangan'
+  if (han === 3 && fu >= 70) return 'mangan'
 
   return null
 }
@@ -39,5 +38,5 @@ export function getLimitHand(han: number, fu: number): LimitHandName | null {
 export const MANGAN_THRESHOLD = {
   han5: 5,
   han4fu40: { han: 4, fu: 40 },
-  han3fu60: { han: 3, fu: 60 },
+  han3fu70: { han: 3, fu: 70 },
 }
