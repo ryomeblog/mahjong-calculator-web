@@ -100,11 +100,12 @@ export function HandStructureInput({
             <div className="mb-2 flex items-center justify-between gap-2">
               <span className="text-xs font-semibold text-slate-400">
                 {slot.label}
-                {slot.maxTiles === 4 &&
+                {slot.label.startsWith('面子') &&
+                slot.maxTiles === 4 &&
                 slot.sidewaysTiles &&
                 slot.sidewaysTiles.size > 0 ? (
                   <span className="ml-1 text-orange-400">（鳴きカン）</span>
-                ) : slot.maxTiles === 4 ? (
+                ) : slot.label.startsWith('面子') && slot.maxTiles === 4 ? (
                   <span className="ml-1 text-purple-400">（カン）</span>
                 ) : slot.sidewaysTiles && slot.sidewaysTiles.size > 0 ? (
                   <span className="ml-1 text-orange-400">（鳴き）</span>
