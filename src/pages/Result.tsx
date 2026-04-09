@@ -212,18 +212,42 @@ export function Result() {
   // 特殊形を先にチェック（七対子、国士無双）- カンの場合はスキップ
   const specialForms = hasKan ? [] : detectSpecialForms(tiles, winningTile)
 
-  // 特殊形がある場合はそれを使用、なければ標準形で分解
-  let meldGroup: MeldGroup
-  let yakuList: ReturnType<typeof detectYaku>
-  let specialForm: SpecialForm | null = null
+  // 候補となるMeldGroupを全て集めて、最高得点のものを採用する
+  type Candidate = {
+    meldGroup: MeldGroup
+    yakuList: ReturnType<typeof detectYaku>
+    han: number
+    fu: ReturnType<typeof calculateFu>
+    score: ReturnType<typeof calculateScore>
+    specialForm: SpecialForm | null
+  }
 
-  if (specialForms.length > 0) {
-    // 特殊形（七対子、国士無双）の場合
-    specialForm = specialForms[0]
-    // SpecialFormをMeldGroupに変換（ダミーの面子構成を作成）
-    meldGroup = convertSpecialFormToMeldGroup(specialForm)
-    yakuList = detectYaku(meldGroup, conditions)
-  } else if (hasKan && state.handGroups) {
+  const candidates: Candidate[] = []
+
+  const evaluate = (
+    mg: MeldGroup,
+    sf: SpecialForm | null
+  ): Candidate | null => {
+    try {
+      const yl = detectYaku(mg, conditions)
+      if (yl.length === 0) return null
+      const h = calculateHan(yl, conditions)
+      const fc = calculateFu(mg, conditions)
+      const sc = calculateScore(fc, h, conditions)
+      return {
+        meldGroup: mg,
+        yakuList: yl,
+        han: h,
+        fu: fc,
+        score: sc,
+        specialForm: sf,
+      }
+    } catch {
+      return null
+    }
+  }
+
+  if (hasKan && state.handGroups) {
     // カンを含む手牌: handGroupsから直接MeldGroupを構築
     const builtGroup = buildMeldGroupFromGroups(
       state.handGroups,
@@ -238,24 +262,37 @@ export function Result() {
         />
       )
     }
-    meldGroup = builtGroup
-    yakuList = detectYaku(meldGroup, conditions)
+    const c = evaluate(builtGroup, null)
+    if (c) candidates.push(c)
   } else {
-    // 標準形の場合
+    // 標準形の全ての分解を試す
     const meldGroups = decomposeStandard(tiles, winningTile)
+    for (const mg of meldGroups) {
+      const applied = applyOpenMelds(mg, openMeldTiles)
+      const c = evaluate(applied, null)
+      if (c) candidates.push(c)
+    }
 
-    if (meldGroups.length === 0) {
+    // 特殊形（七対子・国士無双）の候補も加える
+    for (const sf of specialForms) {
+      const mg = convertSpecialFormToMeldGroup(sf)
+      const c = evaluate(mg, sf)
+      if (c) candidates.push(c)
+    }
+  }
+
+  if (candidates.length === 0) {
+    // 分解は成立しているが役がない、または分解自体が失敗した場合
+    const hasAnyDecomposition =
+      specialForms.length > 0 ||
+      (!hasKan && decomposeStandard(tiles, winningTile).length > 0) ||
+      (hasKan && state.handGroups)
+
+    if (!hasAnyDecomposition) {
       return (
         <ErrorScreen message="面子分解に失敗しました" navigate={navigate} />
       )
     }
-
-    // 鳴き面子の情報を反映
-    meldGroup = applyOpenMelds(meldGroups[0], openMeldTiles)
-    yakuList = detectYaku(meldGroup, conditions)
-  }
-
-  if (yakuList.length === 0) {
     return (
       <ErrorScreen
         message="役がありません（和了形ですが役なし）"
@@ -264,10 +301,22 @@ export function Result() {
     )
   }
 
-  // 翻数・符・点数計算
-  const han = calculateHan(yakuList, conditions)
-  const fuCalculation = calculateFu(meldGroup, conditions)
-  const scoreCalculation = calculateScore(fuCalculation, han, conditions)
+  // 最高得点の候補を選択
+  // 比較基準: 役満 > 翻数 > 符 > basePoints
+  const best = candidates.reduce((a, b) => {
+    const aIsYakuman = a.yakuList.some((y) => y.isYakuman)
+    const bIsYakuman = b.yakuList.some((y) => y.isYakuman)
+    if (aIsYakuman !== bIsYakuman) return aIsYakuman ? a : b
+    if (a.han !== b.han) return a.han > b.han ? a : b
+    if (a.fu.total !== b.fu.total) return a.fu.total > b.fu.total ? a : b
+    return a.score.basePoints >= b.score.basePoints ? a : b
+  })
+
+  const meldGroup: MeldGroup = best.meldGroup
+  const yakuList = best.yakuList
+  const han = best.han
+  const fuCalculation = best.fu
+  const scoreCalculation = best.score
 
   // 合計点数と支払い内訳を計算（本場＝honba を考慮）
   let totalScore = 0

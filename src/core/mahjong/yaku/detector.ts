@@ -63,9 +63,13 @@ export function detectYaku(
     return yakumanList // 役満があれば通常役は含めない
   }
 
+  // 七対子判定フラグ（chiitoitsu の場合は面子構造に依存する役をスキップする）
+  const isChiitoitsu =
+    meldGroup.isSpecial && meldGroup.specialType === 'chiitoitsu'
+
   // 2. 特殊形の役
   // 七対子
-  if (meldGroup.isSpecial && meldGroup.specialType === 'chiitoitsu') {
+  if (isChiitoitsu) {
     yaku.push(createYakuItem('chiitoitsu'))
   }
 
@@ -100,85 +104,93 @@ export function detectYaku(
     yaku.push(createYakuItem('chankan'))
   }
 
-  // 3. 手役
+  // 3. 手役（全牌ベースの役は七対子でも判定可能）
   // 6翻役（優先度高）
   if (isChinitsu(meldGroup)) {
     yaku.push(createYakuItem('chinitsu', isOpen))
   }
 
-  // 3翻役
+  // 3翻役（全牌ベース）
   if (isHonitsu(meldGroup)) {
     yaku.push(createYakuItem('honitsu', isOpen))
   }
 
-  if (isJunchan(meldGroup)) {
-    yaku.push(createYakuItem('junchan', isOpen))
-  }
-
-  if (isRyanpeikou(meldGroup)) {
-    yaku.push(createYakuItem('ryanpeikou', isOpen))
-  }
-
-  // 2翻役
-  if (isChanta(meldGroup)) {
-    yaku.push(createYakuItem('chanta', isOpen))
-  }
-
-  if (isIkkitsuukan(meldGroup)) {
-    yaku.push(createYakuItem('ikkitsuukan', isOpen))
-  }
-
-  if (isSanshokuDoujun(meldGroup)) {
-    yaku.push(createYakuItem('sanshoku-doujun', isOpen))
-  }
-
-  if (isSanshokuDoukou(meldGroup)) {
-    yaku.push(createYakuItem('sanshoku-doukou', isOpen))
-  }
-
-  if (isSankantsu(meldGroup)) {
-    yaku.push(createYakuItem('sankantsu', isOpen))
-  }
-
-  if (isToitoi(meldGroup)) {
-    yaku.push(createYakuItem('toitoi', isOpen))
-  }
-
-  if (isSanankou(meldGroup, conditions)) {
-    yaku.push(createYakuItem('sanankou', isOpen))
-  }
-
-  if (isShousangen(meldGroup)) {
-    yaku.push(createYakuItem('shousangen', isOpen))
-  }
-
-  if (isHonroutou(meldGroup)) {
-    yaku.push(createYakuItem('honroutou', isOpen))
-  }
-
-  // 1翻役
+  // 1翻役（全牌ベース）
   if (isTanyao(meldGroup)) {
     yaku.push(createYakuItem('tanyao', isOpen))
   }
 
-  if (isPinfu(meldGroup, conditions)) {
-    yaku.push(createYakuItem('pinfu', isOpen))
-  }
+  // 七対子の場合、面子構造に依存する役は判定しない
+  if (!isChiitoitsu) {
+    // 3翻役
+    if (isJunchan(meldGroup)) {
+      yaku.push(createYakuItem('junchan', isOpen))
+    }
 
-  if (isIipeikou(meldGroup)) {
-    yaku.push(createYakuItem('iipeikou', isOpen))
-  }
+    const hasRyanpeikou = isRyanpeikou(meldGroup)
+    if (hasRyanpeikou) {
+      yaku.push(createYakuItem('ryanpeikou', isOpen))
+    }
 
-  // 役牌（風牌）
-  const yakuhaiWindCount = countYakuhaiWind(meldGroup, conditions)
-  for (let i = 0; i < yakuhaiWindCount; i++) {
-    yaku.push(createYakuItem('yakuhai-wind', isOpen))
-  }
+    // 2翻役
+    // 混全帯么九は純全帯么九と排他（純全帯么九が優先、chanta 自身が字牌必須なので自動的に排他）
+    if (isChanta(meldGroup)) {
+      yaku.push(createYakuItem('chanta', isOpen))
+    }
 
-  // 役牌（三元牌）
-  const yakuhaiDragonCount = countYakuhaiDragon(meldGroup)
-  for (let i = 0; i < yakuhaiDragonCount; i++) {
-    yaku.push(createYakuItem('yakuhai-dragon', isOpen))
+    if (isIkkitsuukan(meldGroup)) {
+      yaku.push(createYakuItem('ikkitsuukan', isOpen))
+    }
+
+    if (isSanshokuDoujun(meldGroup)) {
+      yaku.push(createYakuItem('sanshoku-doujun', isOpen))
+    }
+
+    if (isSanshokuDoukou(meldGroup)) {
+      yaku.push(createYakuItem('sanshoku-doukou', isOpen))
+    }
+
+    if (isSankantsu(meldGroup)) {
+      yaku.push(createYakuItem('sankantsu', isOpen))
+    }
+
+    if (isToitoi(meldGroup)) {
+      yaku.push(createYakuItem('toitoi', isOpen))
+    }
+
+    if (isSanankou(meldGroup, conditions)) {
+      yaku.push(createYakuItem('sanankou', isOpen))
+    }
+
+    if (isShousangen(meldGroup)) {
+      yaku.push(createYakuItem('shousangen', isOpen))
+    }
+
+    if (isHonroutou(meldGroup)) {
+      yaku.push(createYakuItem('honroutou', isOpen))
+    }
+
+    // 1翻役
+    if (isPinfu(meldGroup, conditions)) {
+      yaku.push(createYakuItem('pinfu', isOpen))
+    }
+
+    // 一盃口は二盃口と排他（二盃口が検出された場合は一盃口を重複加算しない）
+    if (!hasRyanpeikou && isIipeikou(meldGroup)) {
+      yaku.push(createYakuItem('iipeikou', isOpen))
+    }
+
+    // 役牌（風牌）
+    const yakuhaiWindCount = countYakuhaiWind(meldGroup, conditions)
+    for (let i = 0; i < yakuhaiWindCount; i++) {
+      yaku.push(createYakuItem('yakuhai-wind', isOpen))
+    }
+
+    // 役牌（三元牌）
+    const yakuhaiDragonCount = countYakuhaiDragon(meldGroup)
+    for (let i = 0; i < yakuhaiDragonCount; i++) {
+      yaku.push(createYakuItem('yakuhai-dragon', isOpen))
+    }
   }
 
   // 役がない場合はエラー

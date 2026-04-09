@@ -49,9 +49,11 @@ export function detectWaitType(
         const numbers = tiles.map((t) => t.number || 0)
 
         // 辺張待ち（12 → 3 or 89 → 7）
+        // 順子 1-2-3 の winIndex=2（3 和了、12 ペンチャン）
+        // 順子 7-8-9 の winIndex=0（7 和了、89 ペンチャン）
         if (
           (numbers[0] === 1 && numbers[1] === 2 && winIndex === 2) ||
-          (numbers[0] === 7 && numbers[1] === 8 && winIndex === 2)
+          (numbers[1] === 8 && numbers[2] === 9 && winIndex === 0)
         ) {
           return 'penchan'
         }
